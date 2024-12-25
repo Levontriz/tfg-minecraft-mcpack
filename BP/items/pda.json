@@ -1,0 +1,20 @@
+{
+    "format_version": "1.20.30",
+    "minecraft:item": {
+      "description": {
+        "identifier": "tfg:pda",
+        "menu_category": { 
+        "category": "equipment"
+      }
+      },
+      "components": {
+        "minecraft:max_stack_size": 1,
+        "minecraft:icon": {
+          "texture": "tfg:pda"
+        },
+        "minecraft:display_name": {
+          "value": "PDA"
+        }
+      }
+    }
+  }

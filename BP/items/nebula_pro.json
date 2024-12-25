@@ -1,0 +1,20 @@
+{
+    "format_version": "1.20.30",
+    "minecraft:item": {
+      "description": {
+        "identifier": "tfg:nebula_pro",
+        "menu_category": { 
+        "category": "none"
+      }
+      },
+      "components": {
+        "minecraft:max_stack_size": 1,
+        "minecraft:icon": {
+          "texture": "tfg:nebula_pro"
+        },
+        "minecraft:display_name": {
+          "value": "§dNebula Pro"
+        }
+      }
+    }
+  }
