@@ -6,20 +6,24 @@ import {
   Dimension,
   Player,
   Scoreboard,
-  GameMode,
-  RawMessage
+  GameMode
 } from "@minecraft/server";
 
-// used in givePhoneSigniture()
-var rightClickSignature = false;
-var playerToSign = null;
-// used in serverUtil() under the clear option
-var clearSignatures = false;
-// used in clearInventoryConfig()
-var rightClickAddItemToWhitelist = false;
-// used in addLore()
-var rightClickSetLore = false;
-var loreToSet = [];
+
+
+
+function clearAllRightClick(player) {
+  // used in givePhoneSigniture()
+  player.setDynamicProperty("rightClickSignature", false)
+  player.setDynamicProperty("playerToSign")
+  // used in serverUtil() under the clear option
+  player.setDynamicProperty("clearSignatures", false)
+  // used in clearInventoryConfig()
+  player.setDynamicProperty("rightClickAddItemToWhitelist", false)
+  // used in addLore()
+  player.setDynamicProperty("rightClickSetLore", false)
+  player.setDynamicProperty("loreToSet", "[]")
+}
 
 
 const payToUsePhones = [
@@ -39,8 +43,18 @@ const phoneLevels = {
 
 import { ActionFormData, ModalFormData } from '@minecraft/server-ui';
 
+world.afterEvents.playerSpawn.subscribe((eventData) => {
+  var { initialSpawn, player } = eventData;
+
+
+  if (initialSpawn) {
+    clearAllRightClick(player);
+  }
+})
+
 world.afterEvents.itemUse.subscribe((eventData) => {
-  const DevMode = true;
+  
+  const DevMode = false;
 
   var Noah;
 
@@ -51,11 +65,22 @@ world.afterEvents.itemUse.subscribe((eventData) => {
   }
 
   const { source, itemStack } = eventData;
-  var selectedItem = source.getComponent("inventory").container.getSlot(source.selectedSlotIndex);
+  var selectedItem = source.getComponent("inventory").container.getSlot(source.selectedSlotIndex)
+
+  const rightClickSignature = source.getDynamicProperty("rightClickSignature");
+  const playerToSign = source.getDynamicProperty("playerToSign");
+
+  const clearSignatures = source.getDynamicProperty("clearSignatures");
+
+  const rightClickAddItemToWhitelist = source.getDynamicProperty("rightClickAddItemToWhitelist");
+
+  const rightClickSetLore = source.getDynamicProperty("rightClickSetLore");
+  const loreToSet = source.getDynamicProperty("loreToSet");
 
   if (rightClickSetLore) {
     selectedItem.setLore(loreToSet);
     source.sendMessage(`§l§aLore set!`);
+    clearAllRightClick(source);
     return;
   }
 
@@ -80,13 +105,15 @@ world.afterEvents.itemUse.subscribe((eventData) => {
       } else {
         source.sendMessage(`§l§6${itemName} §aadded to whitelist`);
       }
-      rightClickAddItemToWhitelist = false;
+      clearAllRightClick(source);
+
       return;
     } else {
       let whitelist = JSON.parse(playerWhitelist);
       if (whitelist.includes(itemId)) {
         source.sendMessage("§l§aItem is already in your whitelist!");
-        rightClickAddItemToWhitelist = false;
+        clearAllRightClick(source);
+
         return;
       }
       whitelist.push(itemId);
@@ -96,27 +123,31 @@ world.afterEvents.itemUse.subscribe((eventData) => {
       } else {
         source.sendMessage(`§l§6${itemName} §aadded to whitelist`);
       }
-      rightClickAddItemToWhitelist = false;
+      clearAllRightClick(source);
+
       return;
     }
   }
 
   if (clearSignatures) {
-    clearSignatures = false;
+    clearAllRightClick(source);
+
     selectedItem.clearDynamicProperties();
+    selectedItem.setLore([]);
     source.sendMessage("§l§aSuccessfully cleared all data")
     return;
   }
 
   if (rightClickSignature) {
     try {
-      selectedItem.setDynamicProperty("Owner", playerToSign.name);
-      selectedItem.setLore(`Owned by ${playerToSign.name}`);
+      selectedItem.setDynamicProperty("Owner", playerToSign);
+      selectedItem.setLore([`Owned by ${playerToSign}`]);
       source.sendMessage("§l§aPlayer successfully added to dynamic property");
-      rightClickSignature = false;
-      playerToSign = null;
+      clearAllRightClick(source);
+
       return;
     } catch (error) {
+      console.log(error);
       source.sendMessage("§c§lPlease use a non-stackable item and try again!");
       return;
     }
@@ -132,6 +163,7 @@ world.afterEvents.itemUse.subscribe((eventData) => {
     let signature = selectedItem.getDynamicProperty("Owner")
     if (signature === source.name) {
       let phoneLevel = phoneLevels[itemStack.typeId]
+      selectedItem.setLore([`Owned by ${signature}`]);
       mainUi(source, Noah, phoneLevel)
       return;
     } else {
@@ -283,14 +315,9 @@ function serverUtil(player, Noah) {
       givePhoneSigniture(player)
     } else if (command == "ClearSignatures") {
 
-      // right click stuff
-      rightClickSignature = false;
-      playerToSign = null;
-      rightClickAddItemToWhitelist = false;
-      rightClickSetLore = false;
-      loreToSet = null;
+      clearAllRightClick(player);
       
-      clearSignatures = true;
+      player.setDynamicProperty("clearSignatures", true)
       player.sendMessage("§l§aRight click a non-stackable item in your inventory to remove all signatures.")
     }
   });
@@ -319,15 +346,9 @@ function addLore(player) {
       for (let i of response.formValues) {
         loreToSet.push(i);
       }
-      //right click stuff
+      clearAllRightClick(player);
 
-      // used in givePhoneSigniture()
-      rightClickSignature = false;
-      playerToSign = null;
-      clearSignatures = false;
-      rightClickAddItemToWhitelist = false;
-
-      rightClickSetLore = true;
+      player.setDynamicProperty("rightClickSetLore", true);
       player.sendMessage(`Right click an item to add the lore`);
     });
   });
@@ -340,7 +361,6 @@ function debugMenu(player) {
   debugPanel.button("Clear My Dynamic");
   debugPanel.button("Set Incoming to Levontriz");
   debugPanel.button("Set Outgoing to Levontriz");
-  debugPanel.button("View lore");
 
   debugPanel.show(player).then((response) => {
     if (response.selection == 0) {
@@ -430,14 +450,11 @@ function givePhoneSigniture(player) {
   signatureUi.show(player).then((response) => {
     if (response.formValues === null) return;
     const targetPlayerId = response.formValues;
-    //right click stuff
-    clearSignatures = false;
-    rightClickAddItemToWhitelist = false;
-    rightClickSetLore = false;
-    loreToSet = null;
+    clearAllRightClick(player);
     // Give sig on right click
-    rightClickSignature = true
-    playerToSign = uiPlayerListAdmin[targetPlayerId];
+    player.setDynamicProperty("rightClickSignature", true);
+    player.setDynamicProperty("playerToSign", uiPlayerListAdmin[targetPlayerId].name);
+
     player.sendMessage("§l§aRight click a non-stackable item in your inventory to give it a player use signature.")
   })
 }
@@ -498,15 +515,15 @@ function tpaRequest(player, Noah) {
   });
 }
 
-function bankUi(player, Noah) {
+function bankUi(player, Noah , level) {
   let bank = new ActionFormData();
   let CashV2 = world.scoreboard.getObjective("CashV2");
   let playerCash = CashV2.getScore(player)
 
-  bank.title(`Bank_Master`);
+  bank.title(`Bank`);
 
-  bank.button("Transfer", "textures/ui/placeholder");
-  bank.button("Logs", "textures/ui/placeholder");
+  bank.button("Transfer", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-transfer`);
+  bank.button("Logs", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-transactions`);
 
   bank.show(player).then((response) => {
     if (response.selection == 0) {
@@ -553,11 +570,11 @@ function bankLogs(player) {
     if (logOrderDetails[response.selection].reciever != null) {
       // Case: you sent the money
       let reciever = logOrderDetails[response.selection].reciever;
-      logDetails.body(`§l§aYou sent §c${-cashUsed} §ato §6${reciever} §awith the note: §d${note}`);
+      logDetails.body(`§l§aYou sent §c${-cashUsed} §ato §6${reciever} §awith the note:\n§d${note}`);
     } else {
       // Case: you received the money
       let sender = logOrderDetails[response.selection].sender
-      logDetails.body(`§l§aYou recieved ${cashUsed} §afrom §6${sender} §awith the note: §d${note}`);
+      logDetails.body(`§l§aYou recieved ${cashUsed} §afrom §6${sender} §awith the note:\n§d${note}`);
     }
     logDetails.button("Close")
     logDetails.show(player);
@@ -661,7 +678,7 @@ function transfer(player, Noah) {
 
 
     player.sendMessage("§a§lFinished transaction")
-    transferTarget.sendMessage(`§l§aYou were transferred §r§e$${amountToTransferInt} §a§lfrom §r§7§o${player.name}`);
+    transferTarget.sendMessage(`§l§aYou were transferred §r§e$${amountToTransferInt} §a§lfrom §r§7§o${player.name} §r§a§lwith the note §d${playerNote}!`);
     transferTarget.playSound("random.levelup");
     Noah.sendMessage(`§7§o${player.name} transferred ${amountToTransferInt} to ${uiPlayerList[playerTransaction].name}`)
     return;
@@ -914,15 +931,10 @@ function clearInventoryConfig(player, Noah) {
     if (command == "addItemToWhitelist") {
       player.sendMessage("§l§6§oRight click §r§l§awhile holding §6§oany §r§l§aitem in your inventory to add every item of its type to your whitelist")
 
-      // used in givePhoneSigniture()
-      rightClickSignature = false;
-      playerToSign = null;
-      clearSignatures = false;
-      rightClickSetLore = false;
-      loreToSet = null;
+      clearAllRightClick(player);
 
       // right click stuff!!!
-      rightClickAddItemToWhitelist = true;
+      player.setDynamicProperty("rightClickAddItemToWhitelist", true);
     } else {
       let itemDisplayName;
       if (command == "tfg:aphone") {
@@ -980,12 +992,39 @@ function clearInventory(player, Noah) {
   }
 }
 
+function settingsMenu(player, Noah, level) {
+  let CommandOrder = [];
+  const settingsUi = new ActionFormData();
+  settingsUi.title("Settings");
+  if (level < 2) {
+    settingsUi.button("No settings here!");
+  }
+  if (level >= 3) {
+    settingsUi.button("Set Home")
+    CommandOrder.push("SH");
+  }
+  if (level >= 2) {
+    settingsUi.button("Clear Config")
+    CommandOrder.push("ClearConfig");
+  }
+
+  settingsUi.show(player).then((response) => {
+    let command = CommandOrder[response.selection];
+    if (command == "SH") {
+      setHome(player, Noah);
+    } else if (command == "ClearConfig") {
+      clearInventoryConfig(player, Noah);
+    }
+  })
+
+}
+
 
 function mainUi(player, Noah, level) {
   let CommandOrder = [];
 
   const Ui = new ActionFormData();
-  Ui.title("Main_Menu_Phone");
+  Ui.title("Home Screen");
   Ui.body("");
 
   if (player.getDynamicProperty("IncomingRequest") == undefined) {
@@ -1000,66 +1039,66 @@ function mainUi(player, Noah, level) {
     var playerOutgoingTpa = JSON.parse(player.getDynamicProperty("OutgoingRequest"));
   }
 
+  let tpaIcon = `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-tpareqs`
   if (playerIncomingTpa.length > 0 || playerOutgoingTpa.length > 0) {
 
-    Ui.button(`${playerIncomingTpa.length} Incoming TPA, ${playerOutgoingTpa.length} Outgoing TPA`, "textures/ui/placeholder")
+    Ui.button(`${playerIncomingTpa.length} Incoming TPA, ${playerOutgoingTpa.length} Outgoing TPA`, tpaIcon)
     CommandOrder.push("TPAOptions");
   }
 
   if (level >= 3) {
-    
-    Ui.button("Home", "textures/ui/home")
+    Ui.button("Home", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-home`)
     CommandOrder.push("Home");
   }
 
   if (level >= 3) {
-    Ui.button("Speed", "textures/ui/speed")
+    Ui.button("Speed", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-speed`);
     CommandOrder.push("Speed");
   }
-  Ui.button("Fast Travel", "textures/ui/fast_travel")
+  Ui.button("Fast Travel", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-fasttravel`);
   CommandOrder.push("FT");
-  Ui.button("Bank", "textures/ui/bank")
+  Ui.button("Bank", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-bank`)
   CommandOrder.push("Bank");
   if (level >= 1) {
-    Ui.button("Teleport to Player", "textures/ui/tpa")
+    Ui.button("Teleport to Player", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-tpa`)
     CommandOrder.push("TPA");
   }
 
   if (level >= 2) {
-    Ui.button("Clear", "textures/ui/clear")
+    Ui.button("Clear", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-clear`)
     CommandOrder.push("Clear");
   }
 
-  Ui.button("Settings", "textures/ui/settings")
-  CommandOrder.push("Settings");
+  if (level != 0) {
+    Ui.button("Settings", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-settings`)
+    CommandOrder.push("Settings");
+  }
 
+  /*Ui.button("placeholder", "textures/ui/placeholder")
   Ui.button("placeholder", "textures/ui/placeholder")
   Ui.button("placeholder", "textures/ui/placeholder")
   Ui.button("placeholder", "textures/ui/placeholder")
   Ui.button("placeholder", "textures/ui/placeholder")
   Ui.button("placeholder", "textures/ui/placeholder")
-  Ui.button("placeholder", "textures/ui/placeholder")
-  Ui.button("placeholder", "textures/ui/placeholder")
+  Ui.button("placeholder", "textures/ui/placeholder")*/
 
 
   Ui.show(player).then((response) => {
     let command = CommandOrder[response.selection];
     if (command == "TPAOptions") {
       tpaManagment(player, Noah, playerIncomingTpa, playerOutgoingTpa);
-    } else if (command == "ClearConfig") {
-      clearInventoryConfig(player, Noah);
     } else if (command == "FT") {
       fastTravelUi(player, Noah, level);
     } else if (command == "Bank") {
-      bankUi(player, Noah);
+      bankUi(player, Noah, level);
     } else if (command == "TPA") {
       tpaRequest(player, Noah);
     } else if (command == "Clear") {
       clearInventory(player, Noah);
     } else if (command == "Home") {
       home(player, Noah);
-    } else if (command == "SH") {
-      setHome(player, Noah);
+    } else if (command == "Settings") {
+      settingsMenu(player, Noah, level);
     } else if (command == "Speed") {
       player.runCommand("effect @s speed 10 100 true");
       player.sendMessage("§l§aSpeed boost");
