@@ -224,8 +224,8 @@ function adminBankUi(player) {
   const bankSelectionUi = new ActionFormData();
   bankSelectionUi.title(`Admin Bank Selector`);
   bankSelectionUi.body("");
-  bankSelectionUi.button("Adjust Player")
-  bankSelectionUi.button("Admin Logs")
+  bankSelectionUi.button("Adjust Player", "textures/tfg-icons-/t-/4-/unused-/t4-unused-transfer")
+  bankSelectionUi.button("Admin Logs", "textures/tfg-icons-/t-/4-/unused-/t4-unused-transactions")
 
   bankSelectionUi.show(player).then((response) => {
     if (response.selection == 0) {
@@ -492,17 +492,17 @@ function adminUi(player, Noah) {
   const adminUiPanel = new ActionFormData();
   adminUiPanel.title("Admin");
   adminUiPanel.body("What function to run?");
-  adminUiPanel.button("Home");
+  adminUiPanel.button("Home", "textures/tfg-icons-/t-/4-/default-/t4-default-home");
   CommandOrder.push("Home");
-  adminUiPanel.button("Clear");
+  adminUiPanel.button("Clear", "textures/tfg-icons-/t-/4-/default-/t4-default-clear");
   CommandOrder.push("Clear");
-  adminUiPanel.button("Fast Travel");
+  adminUiPanel.button("Fast Travel", "textures/tfg-icons-/t-/4-/default-/t4-default-fasttravel");
   CommandOrder.push("FastTravel");
-  adminUiPanel.button("Speed");
+  adminUiPanel.button("Speed", "textures/tfg-icons-/t-/4-/default-/t4-default-speed");
   CommandOrder.push("Speed");
-  adminUiPanel.button("Server Utility");
+  adminUiPanel.button("Server Utility", "textures/tfg-icons-/t-/4-/default-/t4-default-server");
   CommandOrder.push("ServerUtility");
-  adminUiPanel.button("Debug Panel");
+  adminUiPanel.button("Debug Panel", "textures/tfg-icons-/t-/4-/default-/t4-default-debug");
   CommandOrder.push("DebugPanel");
 
 
