@@ -101,17 +101,6 @@
             }
           ]
         }
-      },
-      {
-        "displayed_objective_background": {
-          "type": "image",
-          "texture": "textures/ui/Black",
-          "alpha": 0.15,
-          "size": ["100%sm", 9],
-          "anchor_from": "top_middle",
-          "anchor_to": "top_middle",
-          "layer": 1
-        }
       }
     ]
   },
