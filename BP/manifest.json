@@ -1,40 +1,39 @@
 {
-    "format_version": 2,
-    "header": {
-      "description": "The basic opperations of TFG server economy",
-      "name": "TFG behaviour pack",
-      "uuid":"b57fbf29-9437-4307-9b89-9593942d8121",
-      "version": [1, 0, 0],
-      "min_engine_version": [1, 16, 0]
+  "format_version": 2,
+  "header": {
+    "description": "The basic opperations of TFG server economy",
+    "name": "TFG behaviour pack",
+    "uuid": "b57fbf29-9437-4307-9b89-9593942d8121",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 16, 0]
+  },
+  "modules": [
+    {
+      "description": "TFG Addon",
+      "type": "data",
+      "uuid": "e2ac1276-747e-4c08-895b-137014e1b245",
+      "version": [1, 0, 0]
     },
-    "modules":
-      [
-        {
-          "description": "TFG Addon",
-            "type": "data",
-            "uuid": "e2ac1276-747e-4c08-895b-137014e1b245",
-            "version": [1, 0, 0]
-        },
-        {
-          "description": "Full Script",
-            "type": "script",
-            "uuid": "8758daec-7bac-4923-bcf0-c82a5706d7b3",
-            "version": [1, 0, 0],
-            "entry": "scripts/main.js"
-        }
-      ],
-    "dependencies": [
-      {
-        "uuid":"1931c135-1cc8-4589-a99e-e496cb9b210f",
-        "version":[1,0,0]
-      },
-      {
-        "module_name":"@minecraft/server",
-        "version":"1.14.0"
-      },
-      {
-        "module_name":"@minecraft/server-ui",
-        "version":"1.3.0"
-      }
-    ]
-  }
+    {
+      "description": "Full Script",
+      "type": "script",
+      "uuid": "8758daec-7bac-4923-bcf0-c82a5706d7b3",
+      "version": [1, 0, 0],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "1931c135-1cc8-4589-a99e-e496cb9b210f",
+      "version": [1, 0, 0]
+    },
+    {
+      "module_name": "@minecraft/server",
+      "version": "1.14.0"
+    },
+    {
+      "module_name": "@minecraft/server-ui",
+      "version": "1.3.0"
+    }
+  ]
+}

@@ -221,6 +221,46 @@ function home(player, Noah) {
 }
 
 function adminBankUi(player) {
+  const bankSelectionUi = new ActionFormData();
+  bankSelectionUi.title(`Admin Bank Selector`);
+  bankSelectionUi.body("");
+  bankSelectionUi.button("Adjust Player")
+  bankSelectionUi.button("Admin Logs")
+
+  bankSelectionUi.show(player).then((response) => {
+    if (response.selection == 0) {
+      adminBankAdjustment(player);
+    } else if (response.selection == 1) {
+      adminBankLogs(player);
+    }
+    })
+}
+
+function adminBankLogs(player) {
+  let adminBankLogs = world.getDynamicProperty("adminBankLogs");
+
+  if (adminBankLogs == null) {
+    player.sendMessage("§c§oNo bank logs found.");
+    return;
+  }
+
+  let bankLogJSON = JSON.parse(adminBankLogs);
+
+  let logOrderDetails = [];
+
+
+  const logUi = new ActionFormData();
+  logUi.title(`Admin Bank Logs`);
+  logUi.body("");
+
+  for( let i = bankLogJSON.length - 1; i >= 0; i-- ) {
+    let gainOrLose = (bankLogJSON[i].amount > 0) ? "§a+": "§c"
+    logUi.button(`§l§6${bankLogJSON[i].reciever} ${gainOrLose}${bankLogJSON[i].amount}`)
+  }
+  logUi.show(player);
+}
+
+function adminBankAdjustment(player) {
   const onlinePlayers = world.getAllPlayers();
   let uiPlayerListAdmin = [ /*{ name: player.name } */];
   let CashV2 = world.scoreboard.getObjective("CashV2");
@@ -246,7 +286,7 @@ function adminBankUi(player) {
     const target = world
       .getAllPlayers()
       .find((player) => player.name === uiPlayerListAdmin[targetPlayerName].name);
-    let amountInInt = parseInt(amountInString);
+    var amountInInt = parseInt(amountInString);
 
     if (isNaN(amountInInt)) {
       player.sendMessage("§c§oInvalid amount. Please enter a valid number.");
@@ -259,15 +299,59 @@ function adminBankUi(player) {
     if (!onOffToggle) {
       CashV2.setScore(target, targetCashV2 + amountInInt)
       player.sendMessage(`§l§aYou added §r§e$${amountInInt} §a§lto §r§7§o${target.name}`);
-      player.playSound("random.levelup");
-      target.sendMessage(`§l§aYou have had §r§e$${amountInInt} §a§ladded to your bank account!`)
-      target.playSound("random.levelup");
+      player.playSound("note.pling");
+      target.sendMessage(`§6Server has adjusted your balance by §a+§e$${amountInInt}!`)
+      // §6Server has adjusted your balance by §a+§f/§c-§e$100
+      target.playSound("note.pling");
+      // Since the toggle is off we dont change the "amountInInt" variable
     } else {
       CashV2.setScore(target, targetCashV2 - amountInInt)
       player.sendMessage(`§l§aYou removed §r§e$${amountInInt} §a§lfrom §r§7§o${target.name}`);
-      player.playSound("random.levelup");
-      target.sendMessage(`§l§aYou have had §r§e$${amountInInt} §a§lremoved to your bank account!`)
-      target.playSound("random.levelup");
+      player.playSound("note.pling");
+      target.sendMessage(`§6Server has adjusted your balance by §c-§e$${amountInInt}!`)
+      target.playSound("note.pling");
+      // Since the toggle is on we change the "amountInInt" variable to a negative number for easier logging
+      amountInInt = -amountInInt;
+    }
+
+    let transferTargetBankLogs = target.getDynamicProperty("BankLogs");
+
+
+
+    const targetsLog = {
+      sender: "Server",
+      amount: amountInInt,
+      note: "Server Adjustment"
+    } 
+
+    
+
+    if (transferTargetBankLogs == undefined) {
+      transferTargetBankLogs = [];
+      transferTargetBankLogs.push(targetsLog);
+      target.setDynamicProperty("BankLogs", JSON.stringify(transferTargetBankLogs));
+    } else {
+      transferTargetBankLogs = JSON.parse(transferTargetBankLogs);
+      transferTargetBankLogs.push(targetsLog);
+      target.setDynamicProperty("BankLogs", JSON.stringify(transferTargetBankLogs));
+    }
+
+    let adminBankLogs = world.getDynamicProperty("adminBankLogs");
+
+    const sendersLog = {
+      reciever: target.name,
+      amount: amountInInt,
+      note: "Server Adjustment"
+    }
+
+    if (adminBankLogs == undefined) {
+      adminBankLogs = [];
+      adminBankLogs.push(sendersLog);
+      world.setDynamicProperty("adminBankLogs", JSON.stringify(adminBankLogs));
+    } else {
+      adminBankLogs = JSON.parse(adminBankLogs);
+      adminBankLogs.push(sendersLog);
+      world.setDynamicProperty("adminBankLogs", JSON.stringify(adminBankLogs));
     }
   });
 }
@@ -280,8 +364,8 @@ function serverUtil(player, Noah) {
   serverUtilPanel.body = "What function to run?"
   serverUtilPanel.button("Clear Lag");
   CommandOrder.push("ClearLag");
-  serverUtilPanel.button("Money");
-  CommandOrder.push("Money");
+  serverUtilPanel.button("Bank");
+  CommandOrder.push("Bank");
   serverUtilPanel.button("Add lore");
   CommandOrder.push("AddLore");
   serverUtilPanel.button("give Phone Signiture");
@@ -309,7 +393,7 @@ function serverUtil(player, Noah) {
       clearInventoryConfig(player, Noah);
     } else if (command == "SetHome") {
       setHome(player, Noah);
-    } else if (command == "Money") {
+    } else if (command == "Bank") {
       adminBankUi(player);
     } else if (command == "GivePhoneSigniture") {
       givePhoneSigniture(player)
@@ -335,6 +419,7 @@ function addLore(player) {
   }
 
   preLoreAdd.show(player).then((response) => {
+    if (response.canceled) return;
     var loreLineCountNum = loreLineCount[response.selection];
     const loreForm = new ModalFormData();
     loreForm.title("Add Lore");
@@ -357,10 +442,12 @@ function debugMenu(player) {
   const debugPanel = new ActionFormData();
   debugPanel.title("Debug Menu");
   debugPanel.body("What function to run?");
-  debugPanel.button("View My Dynamic");
-  debugPanel.button("Clear My Dynamic");
+  debugPanel.button("View My Dynamics");
+  debugPanel.button("Clear My Dynamics");
   debugPanel.button("Set Incoming to Levontriz");
   debugPanel.button("Set Outgoing to Levontriz");
+  debugPanel.button("view World Dynamics");
+  debugPanel.button("Clear World Dynamics");
 
   debugPanel.show(player).then((response) => {
     if (response.selection == 0) {
@@ -382,6 +469,19 @@ function debugMenu(player) {
     if (response.selection == 3) {
       player.setDynamicProperty("OutgoingRequest", "[\"Levontriz2197\", \"Purtzle\"]");
       player.sendMessage("§l§aSet Outgoing request to Levontriz2197.")
+    }
+    if (response.selection == 4) {
+      for (let id of world.getDynamicPropertyIds()) {
+        player.sendMessage(id + ":")
+        player.sendMessage(world.getDynamicProperty(id));
+      }
+    }
+    if (response.selection == 5) {
+      for (let id of world.getDynamicPropertyIds()) {
+        if (id == "Cash") continue; 
+        world.setDynamicProperty(id);
+      }
+      player.sendMessage("§l§aCleared all dynamic properties from world.")
     }
   });
 }
@@ -547,15 +647,17 @@ function bankLogs(player) {
   let logOrderDetails = [];
 
   let bankLogUi = new ActionFormData();
-  bankLogUi.title("Bank_Logs");
+  bankLogUi.title("Bank Logs");
   bankLogUi.body("Transfer Logs");
 
   for( let i = bankLogJSON.length - 1; i >= 0; i-- ) {
     let gainOrLose = (bankLogJSON[i].amount > 0) ? "§a": "§c"
     if (bankLogJSON[i].reciever != null) {
+      // When reciver has a value that means that you are the person sending it so you are displaying that you lost money
       bankLogUi.button(`§l§6${bankLogJSON[i].reciever} ${gainOrLose}${bankLogJSON[i].amount}`)
       logOrderDetails.push(bankLogJSON[i]);
     } else {
+      // Opposite here
       bankLogUi.button(`§l§6${bankLogJSON[i].sender} ${gainOrLose}+${bankLogJSON[i].amount}`)
       logOrderDetails.push(bankLogJSON[i]);
     }
@@ -570,11 +672,19 @@ function bankLogs(player) {
     if (logOrderDetails[response.selection].reciever != null) {
       // Case: you sent the money
       let reciever = logOrderDetails[response.selection].reciever;
-      logDetails.body(`§l§aYou sent §c${-cashUsed} §ato §6${reciever} §awith the note:\n§d${note}`);
+      if (note) {
+        logDetails.body(`§l§aYou sent §c${-cashUsed} §ato §6${reciever} §awith the note:\n§d${note}`);
+      } else {
+        logDetails.body(`§l§aYou sent §c${-cashUsed} §ato §6${reciever}`);
+      }
     } else {
       // Case: you received the money
       let sender = logOrderDetails[response.selection].sender
-      logDetails.body(`§l§aYou recieved ${cashUsed} §afrom §6${sender} §awith the note:\n§d${note}`);
+      if (note) {
+        logDetails.body(`§l§aYou recieved ${cashUsed} §afrom §6${sender} §awith the note:\n§d${note}`);
+      } else {
+        logDetails.body(`§l§aYou recieved ${cashUsed} §afrom §6${sender}`);
+      }
     }
     logDetails.button("Close")
     logDetails.show(player);
@@ -583,7 +693,7 @@ function bankLogs(player) {
 
 function transfer(player, Noah) {
   const onlinePlayers = world.getAllPlayers();
-  let uiPlayerList = [ /*{ name: "Levontriz2197" (player.name) } */ { name: "Levontriz2197" }];
+  let uiPlayerList = [ /*{ name: "Levontriz2197" (player.name) } */ /*{ name: "Levontriz2197" }*/];
   let CashV2 = world.scoreboard.getObjective("CashV2");
   let playerCash = CashV2.getScore(player)
 
@@ -640,7 +750,7 @@ function transfer(player, Noah) {
     const sendersLog = {
       sender: player.name,
       amount: amountToTransferInt,
-      note: playerNote
+      note: playerNote ? playerNote : null
     } 
 
     
@@ -660,7 +770,7 @@ function transfer(player, Noah) {
     const playersLog = {
       reciever: transferTarget.name,
       amount: -amountToTransferInt,
-      note: playerNote
+      note: playerNote ? playerNote : null
     }
 
     if (playerBankLogs == undefined) {
@@ -678,8 +788,13 @@ function transfer(player, Noah) {
 
 
     player.sendMessage("§a§lFinished transaction")
-    transferTarget.sendMessage(`§l§aYou were transferred §r§e$${amountToTransferInt} §a§lfrom §r§7§o${player.name} §r§a§lwith the note §d${playerNote}!`);
-    transferTarget.playSound("random.levelup");
+    if (playerNote) {
+      transferTarget.sendMessage(`§l§aYou were transferred §r§e$${amountToTransferInt} §a§lfrom §r§7§o${player.name} §r§a§lwith the note §d${playerNote}!`);
+    } else {
+      transferTarget.sendMessage(`§l§aYou were transferred §r§e$${amountToTransferInt} §a§lfrom §r§7§o${player.name}`);
+    }
+    transferTarget.playSound("random.pling");
+    player.playSound("note.pling");
     Noah.sendMessage(`§7§o${player.name} transferred ${amountToTransferInt} to ${uiPlayerList[playerTransaction].name}`)
     return;
   });
