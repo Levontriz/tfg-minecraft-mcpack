@@ -90,8 +90,8 @@ world.afterEvents.itemUse.subscribe((eventData) => {
     for (var i = 0; i < itemName.length; i++) {
       // You do not need to check if i is larger than itemName length, as your for does that for you
       // Assign it back to the array
-      itemName[i] = itemName[i].charAt(0).toUpperCase() + itemName[i].substring(1);     
-  }
+      itemName[i] = itemName[i].charAt(0).toUpperCase() + itemName[i].substring(1);
+    }
 
     itemName = itemName.join(" ");
 
@@ -559,62 +559,6 @@ function givePhoneSigniture(player) {
   })
 }
 
-function tpaRequest(player, Noah) {
-  const onlinePlayers = world.getAllPlayers();
-  let uiPlayerList = [ /*{ name: player.name } */];
-
-  for (let playerList of onlinePlayers) {
-    if (playerList.name === player.name) continue;
-    let addToPlayerList = { name: playerList.name };
-
-    uiPlayerList.push(addToPlayerList);
-  }
-
-  let tpa = new ModalFormData();
-  tpa.title(`Send a Teleport Request`)
-  tpa.dropdown(
-    "Player",
-    uiPlayerList.map((player) => player.name)
-  );
-
-  tpa.show(player).then((response) => {
-    const targetPlayerThing = response.formValues;
-
-    const targetPlayer = world
-      .getAllPlayers()
-      .find((player) => player.name === uiPlayerList[targetPlayerThing].name);
-
-    var playerOutgoingRequest = player.getDynamicProperty("OutGoingRequest");
-
-    if (playerOutgoingRequest == null) {
-      player.setDynamicProperty("OutgoingRequest", `[\"${targetPlayer.name}\"]`);
-    } else {
-      let OutputRequest = JSON.parse(playerOutgoingRequest);
-
-      OutputRequest.push(targetPlayer.name);
-
-      player.setDynamicProperty("OutgoingRequest", JSON.stringify(OutputRequest));
-    }
-
-    var TargetPlayerIncomingRequest = targetPlayer.getDynamicProperty("IncomingRequest")
-
-
-    if (TargetPlayerIncomingRequest == null) {
-      targetPlayer.setDynamicProperty("IncomingRequest", `[\"${player.name}\"]`);
-    } else {
-      let IncomingRequest = JSON.parse(TargetPlayerIncomingRequest);
-      IncomingRequest.push(player.name);
-
-      targetPlayer.setDynamicProperty("IncomingRequest", JSON.stringify(IncomingRequest));
-    }
-
-
-
-    targetPlayer.sendMessage(`§a§lYou have recieved a teleport request from §e${player.name}!`);
-    player.sendMessage(`§a§lSent a teleport request to §e${targetPlayer.name}`);
-  });
-}
-
 function bankUi(player, Noah , level) {
   let bank = new ActionFormData();
   let CashV2 = world.scoreboard.getObjective("CashV2");
@@ -793,178 +737,35 @@ function transfer(player, Noah) {
     } else {
       transferTarget.sendMessage(`§l§aYou were transferred §r§e$${amountToTransferInt} §a§lfrom §r§7§o${player.name}`);
     }
-    transferTarget.playSound("random.pling");
+    transferTarget.playSound("random.levelup");
     player.playSound("note.pling");
     Noah.sendMessage(`§7§o${player.name} transferred ${amountToTransferInt} to ${uiPlayerList[playerTransaction].name}`)
     return;
   });
 }
 
-function tpaIncoming(player, Noah, incomingTpa) {
-  const onlinePlayers = world.getAllPlayers().map((player) => player.name);
-  let listUsedForDisplay = [];
-
-  console.log(JSON.stringify(onlinePlayers))
-
-  for (let i = 0; i < incomingTpa.length; i++) {
-    if (onlinePlayers.includes(incomingTpa[i])) {
-      listUsedForDisplay.push(onlinePlayers[i]);
-      console.log(onlinePlayers)
-      continue;
-    }
-  }
-
-  let IncomingOrder = [];
-
-  let tpaUi = new ActionFormData();
-  tpaUi.title(`Incoming Teleport Requests`);
-
-  for (let tpaSender of listUsedForDisplay) {
-    tpaUi.button(tpaSender);
-    IncomingOrder.push(tpaSender);
-  }
-
-  tpaUi.show(player).then((response) => {
-    let selectedSender = IncomingOrder[response.selection];
-    if (selectedSender === undefined) return;
-
-    const tpSender = world.getAllPlayers().find((sender) => sender.name === selectedSender);
-
-    let acceptOrDecline = new ActionFormData();
-    acceptOrDecline.title(`Teleport Request from ${selectedSender}`);
-    acceptOrDecline.button("§a§lAccept");
-    acceptOrDecline.button("§c§lDecline");
-    acceptOrDecline.show(player).then((response) => {
-      if (response.selection == 0) {
-        tpSender.teleport(player.location);
-        player.sendMessage(`§l§e${tpSender.name} §ahas been teleported to you!`)
-        tpSender.sendMessage(`§a§lTeleported to §e${player.name}!`);
-        Noah.sendMessage(`§7§o${tpSender.name} has teleported to ${player.name}`)
-      } else {
-        player.sendMessage(`§l§e${tpSender.name}'s §crequest has been declined`)
-        tpSender.sendMessage(`§c§lTeleported request to §e${player.name} §chas been decline`);
-      }
-
-      incomingTpa = incomingTpa.filter(item => item !== tpSender.name);
-
-      player.setDynamicProperty("IncomingRequest", JSON.stringify(incomingTpa));
-
-      let tpSenderOutgoing = tpSender.getDynamicProperty("OutgoingRequest");
-
-      let tpSenderOutgoingJSON = JSON.parse(tpSenderOutgoing);
-      tpSenderOutgoingJSON = tpSenderOutgoingJSON.filter(item => item !== player.name);
-      tpSender.setDynamicProperty("OutgoingRequest", JSON.stringify(tpSenderOutgoingJSON));
-
-    });
-  });
-}
-
-function tpaOutgoing(player, Noah, outgoingTpa) {
-  const onlinePlayers = world.getAllPlayers();
-
-  for (let allOnlinePlayers of onlinePlayers) {
-    if (allOnlinePlayers.name in outgoingTpa) continue;
-    for (let i in outgoingTpa.length) {
-      if (outgoingTpa[i] === allOnlinePlayers.name) {
-        outgoingTpa.splice(i, 1);
-      }
-    }
-  }
-
-  let OutgoingOrder = [];
-
-  let tpaUi = new ActionFormData();
-  tpaUi.title(`Outgoing Teleport Requests`);
-
-  for (let tpaReciever of outgoingTpa) {
-    tpaUi.button(tpaReciever);
-    OutgoingOrder.push(tpaReciever);
-  }
-
-  tpaUi.show(player).then((response) => {
-    let selectedReciever = OutgoingOrder[response.selection];
-    if (selectedReciever === undefined) return;
-
-    const tpReciever = world.getAllPlayers().find((reciever) => reciever.name === selectedReciever);
-
-
-
-    let keepOrCancel = new ActionFormData();
-    keepOrCancel.title(`Teleport Request for ${selectedReciever}`);
-    keepOrCancel.button("§a§lContinue Request");
-    keepOrCancel.button("§c§lCancel Request");
-    keepOrCancel.show(player).then((response) => {
-      if (response.selection == 1) {
-        outgoingTpa = outgoingTpa.filter(item => item !== tpReciever.name);
-
-        player.setDynamicProperty("OutgoingRequest", JSON.stringify(outgoingTpa));
-
-        let tpRecieverIncoming = JSON.parse(tpReciever.getDynamicProperty("OutgoingRequest"));
-        tpRecieverIncoming = tpRecieverIncoming.filter(item => item !== player.name);
-        tpReciever.setDynamicProperty("IncomingRequest", JSON.stringify(tpRecieverIncoming));
-
-        player.sendMessage(`§l§cRequest for §e${tpReciever.name}'s §chas been canceled`);
-        tpReciever.sendMessage(`§l§e${player.name} §chas canceled their request`);
-      } else {
-        player.sendMessage(`§l§aRequest for §e${tpReciever.name}'s §ahas been kept!`);
-      }
-
-
-    });
-
-
-  });
-}
-
-function tpaManagment(player, Noah, incomingTpa, outgoingTpa) {
-  let CommandOrder = [];
-
-  const incoutg = new ActionFormData();
-  incoutg.title("Incoming and Outgoing Teleport Requests");
-  if (incomingTpa.length > 0) {
-    incoutg.button("Incoming")
-    CommandOrder.push("Incoming");
-  }
-  if (outgoingTpa.length > 0) {
-    incoutg.button("Outgoing")
-    CommandOrder.push("Outgoing");
-  }
-
-  incoutg.show(player).then((response) => {
-    let command = CommandOrder[response.selection];
-
-    if (command == "Incoming") {
-      tpaIncoming(player, Noah, incomingTpa)
-    }
-    if (command == "Outgoing") {
-      tpaOutgoing(player, Noah, outgoingTpa)
-    }
-
-  });
-}
-
 function fastTravelUi(player, Noah, level) {
   const locations = {
     "Spawn": {
-      level: 0, x: 0, y: 4, z: 0
+      level: 0, x: 0, y: 4, z: 0, texture: "textures/tfg-icons-/t-/ft-/t-ft-1spawn"
     },
     "Launchpad": {
-      level: 1, x: -212, y: 5, z: -327
+      level: 1, x: -212, y: 5, z: -327, texture: "textures/tfg-icons-/t-/ft-/t-ft-2launchpad"
     },
     "Parliament": {
-      level: 1, x: -62, y: 4, z: 242
+      level: 1, x: -62, y: 4, z: 242, texture: "textures/tfg-icons-/t-/ft-/t-ft-3parliament"
     },
     "The Bean": {
-      level: 1, x: 400, y: 4, z: -91
+      level: 1, x: 400, y: 4, z: -91, texture: "textures/tfg-icons-/t-/ft-/t-ft-4bean"
     },
     "Tennis Court": {
-      level: 2, x: 515, y: 4, z: 496
+      level: 2, x: 515, y: 4, z: 496, texture: "textures/tfg-icons-/t-/ft-/t-ft-5tennis"
     },
     "Mars": {
-      level: 2, x: -37, y: 20, z: -570
+      level: 2, x: -37, y: 20, z: -570, texture: "textures/tfg-icons-/t-/ft-/t-ft-6mars"
     },
     "Coal Pile": {
-      level: 3, x: 492, y: 7, z: -608
+      level: 3, x: 492, y: 7, z: -608, texture: "textures/tfg-icons-/t-/ft-/t-ft-7coal"
     },
   }
 
@@ -976,7 +777,7 @@ function fastTravelUi(player, Noah, level) {
 
   for (const data in locations) {
     if (level >= locations[data].level) {
-      fastTravelUi.button(data);
+      fastTravelUi.button(data, locations[data].texture);
       order.push(data);
     }
   }
@@ -1142,25 +943,6 @@ function mainUi(player, Noah, level) {
   Ui.title("Home Screen");
   Ui.body("");
 
-  if (player.getDynamicProperty("IncomingRequest") == undefined) {
-    var playerIncomingTpa = []
-  } else {
-    var playerIncomingTpa = JSON.parse(player.getDynamicProperty("IncomingRequest"));
-  }
-
-  if (player.getDynamicProperty("OutgoingRequest") == undefined) {
-    var playerOutgoingTpa = []
-  } else {
-    var playerOutgoingTpa = JSON.parse(player.getDynamicProperty("OutgoingRequest"));
-  }
-
-  let tpaIcon = `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-tpareqs`
-  if (playerIncomingTpa.length > 0 || playerOutgoingTpa.length > 0) {
-
-    Ui.button(`${playerIncomingTpa.length} Incoming TPA, ${playerOutgoingTpa.length} Outgoing TPA`, tpaIcon)
-    CommandOrder.push("TPAOptions");
-  }
-
   if (level >= 3) {
     Ui.button("Home", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-home`)
     CommandOrder.push("Home");
@@ -1174,10 +956,6 @@ function mainUi(player, Noah, level) {
   CommandOrder.push("FT");
   Ui.button("Bank", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-bank`)
   CommandOrder.push("Bank");
-  if (level >= 1) {
-    Ui.button("Teleport to Player", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-tpa`)
-    CommandOrder.push("TPA");
-  }
 
   if (level >= 2) {
     Ui.button("Clear", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-clear`)
@@ -1189,25 +967,12 @@ function mainUi(player, Noah, level) {
     CommandOrder.push("Settings");
   }
 
-  /*Ui.button("placeholder", "textures/ui/placeholder")
-  Ui.button("placeholder", "textures/ui/placeholder")
-  Ui.button("placeholder", "textures/ui/placeholder")
-  Ui.button("placeholder", "textures/ui/placeholder")
-  Ui.button("placeholder", "textures/ui/placeholder")
-  Ui.button("placeholder", "textures/ui/placeholder")
-  Ui.button("placeholder", "textures/ui/placeholder")*/
-
-
   Ui.show(player).then((response) => {
     let command = CommandOrder[response.selection];
-    if (command == "TPAOptions") {
-      tpaManagment(player, Noah, playerIncomingTpa, playerOutgoingTpa);
-    } else if (command == "FT") {
+    if (command == "FT") {
       fastTravelUi(player, Noah, level);
     } else if (command == "Bank") {
       bankUi(player, Noah, level);
-    } else if (command == "TPA") {
-      tpaRequest(player, Noah);
     } else if (command == "Clear") {
       clearInventory(player, Noah);
     } else if (command == "Home") {
@@ -1220,5 +985,5 @@ function mainUi(player, Noah, level) {
       Noah.sendMessage(`§7§o${player.name} activated Speed Boost.`);
     }
     return;
-  }); // show player the form 
+  });
 }
