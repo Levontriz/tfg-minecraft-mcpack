@@ -364,8 +364,6 @@ function serverUtil(player, Noah) {
   serverUtilPanel.body = "What function to run?"
   serverUtilPanel.button("Clear Lag");
   CommandOrder.push("ClearLag");
-  serverUtilPanel.button("Bank");
-  CommandOrder.push("Bank");
   serverUtilPanel.button("Add lore");
   CommandOrder.push("AddLore");
   serverUtilPanel.button("give Phone Signiture");
@@ -393,8 +391,6 @@ function serverUtil(player, Noah) {
       clearInventoryConfig(player, Noah);
     } else if (command == "SetHome") {
       setHome(player, Noah);
-    } else if (command == "Bank") {
-      adminBankUi(player);
     } else if (command == "GivePhoneSigniture") {
       givePhoneSigniture(player)
     } else if (command == "ClearSignatures") {
@@ -494,12 +490,16 @@ function adminUi(player, Noah) {
   adminUiPanel.body("What function to run?");
   adminUiPanel.button("Home", "textures/tfg-icons-/t-/4-/default-/t4-default-home");
   CommandOrder.push("Home");
-  adminUiPanel.button("Clear", "textures/tfg-icons-/t-/4-/default-/t4-default-clear");
-  CommandOrder.push("Clear");
-  adminUiPanel.button("Fast Travel", "textures/tfg-icons-/t-/4-/default-/t4-default-fasttravel");
-  CommandOrder.push("FastTravel");
   adminUiPanel.button("Speed", "textures/tfg-icons-/t-/4-/default-/t4-default-speed");
   CommandOrder.push("Speed");
+  adminUiPanel.button("Fast Travel", "textures/tfg-icons-/t-/4-/default-/t4-default-fasttravel");
+  CommandOrder.push("FastTravel");
+  serverUtilPanel.button("Bank");
+  CommandOrder.push("Bank");
+  //tpa
+
+  adminUiPanel.button("Clear", "textures/tfg-icons-/t-/4-/default-/t4-default-clear");
+  CommandOrder.push("Clear");
   adminUiPanel.button("Server Utility", "textures/tfg-icons-/t-/4-/default-/t4-default-server");
   CommandOrder.push("ServerUtility");
   adminUiPanel.button("Debug Panel", "textures/tfg-icons-/t-/4-/default-/t4-default-debug");
@@ -514,6 +514,8 @@ function adminUi(player, Noah) {
       player.sendMessage("§l§aSpeed boost");
     } else if (command == "ServerUtility") {
       serverUtil(player, Noah);
+    } else if (command == "Bank") {
+      adminBankUi(player);
     } else if (command == "Home") {
       home(player, Noah);
     } else if (command == "Clear") {
