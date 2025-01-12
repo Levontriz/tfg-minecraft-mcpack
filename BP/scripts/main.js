@@ -657,7 +657,7 @@ function transfer(player, Noah) {
     uiPlayerList.map((player) => player.name)
   );
   bankUi.textField("Money", "Amount to transfer");
-  bankUi.textField("Note", "Note for reciever to read");
+  bankUi.textField("Note", "Note for reciever to read (32 characters max)");
 
   bankUi.show(player).then((response) => {
     const [playerTransaction, amountToTransferString, playerNote] = response.formValues;
