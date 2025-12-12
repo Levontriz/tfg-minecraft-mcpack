@@ -1,0 +1,20 @@
+{
+    "format_version": "1.20.30",
+    "minecraft:item": {
+      "description": {
+        "identifier": "tfg:cursor_icon",
+        "menu_category": { 
+        "category": "none"
+      }
+      },
+      "components": {
+        "minecraft:max_stack_size": 1,
+        "minecraft:icon": {
+          "texture": "tfg:cursor_icon"
+        },
+        "minecraft:display_name": {
+          "value": "Cursor"
+        }
+      }
+    }
+  }

@@ -1,0 +1,20 @@
+import { world } from "@minecraft/server";
+
+export function home(player, Noah) {
+  const homeX = world.scoreboard.getObjective("homeX");
+  const homeY = world.scoreboard.getObjective("homeY");
+  const homeZ = world.scoreboard.getObjective("homeZ");
+
+  if (homeX.getScore(player) === 0 || homeY.getScore(player) === 0 || homeZ.getScore(player) === 0) {
+    player.sendMessage("§c§oYou haven't set a home yet. Use sethome to set one!");
+    Noah.sendMessage(`§7§o${player.name} tried to teleport home but doesnt have one`);
+    return;
+  }
+
+  player.teleport(
+    { x: homeX.getScore(player) + 0.5, y: homeY.getScore(player), z: homeZ.getScore(player) + 0.5 },
+    { dimension: world.getDimension("overworld") }
+  );
+  player.sendMessage("§l§aTeleported to your home!");
+  Noah.sendMessage(`§7§o${player.name} teleported to ${homeX.getScore(player)}, ${homeY.getScore(player)}, ${homeZ.getScore(player)}! (Their home)`);
+}

@@ -1,5 +1,5 @@
 {
-    "resource_pack_name": "TFg recource pack for behaviour pack",
+    "resource_pack_name": "TFG resource pack for behaviour pack",
     "texture_data": {
       "tfg:pda": {
         "textures": "textures/items/pda"
@@ -15,6 +15,24 @@
       },
       "tfg:nebula_pro": {
         "textures": "textures/items/nebula_pro"
+      },
+      "tfg:head_icon": {
+        "textures": "textures/tfg-icons-/items-/icons-/items-icons-head"
+      },
+      "tfg:body_icon": {
+        "textures": "textures/tfg-icons-/items-/icons-/items-icons-body"
+      },
+      "tfg:legs_icon": {
+        "textures": "textures/tfg-icons-/items-/icons-/items-icons-legs"
+      },
+      "tfg:feet_icon": {
+        "textures": "textures/tfg-icons-/items-/icons-/items-icons-feet"
+      },
+      "tfg:offhand_icon": {
+        "textures": "textures/tfg-icons-/items-/icons-/items-icons-offhand"
+      },
+      "tfg:cursor_icon": {
+        "textures": "textures/tfg-icons-/items-/icons-/items-icons-cursor"
       }
     }
 }
