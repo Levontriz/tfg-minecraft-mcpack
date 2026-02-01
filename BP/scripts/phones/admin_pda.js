@@ -20,8 +20,8 @@ function adminUi(player, Noah) {
   CommandOrder.push("Speed");
   adminUiPanel.button("Fast Travel", "textures/tfg-icons-/t-/4-/default-/t4-default-fasttravel");
   CommandOrder.push("FastTravel");
-  //serverUtilPanel.button("Bank");
-  //CommandOrder.push("Bank");
+  serverUtilPanel.button("Bank");
+  CommandOrder.push("Bank");
   //tpa
 
   adminUiPanel.button("Clear", "textures/tfg-icons-/t-/4-/default-/t4-default-clear");
