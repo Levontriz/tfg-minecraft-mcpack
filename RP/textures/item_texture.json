@@ -16,6 +16,9 @@
       "tfg:nebula_pro": {
         "textures": "textures/items/nebula_pro"
       },
+      "tfg:prison_pda": {
+        "textures": "textures/items/prison_pda.png"
+      },
       "tfg:head_icon": {
         "textures": "textures/tfg-icons-/items-/icons-/items-icons-head"
       },
@@ -34,5 +37,6 @@
       "tfg:cursor_icon": {
         "textures": "textures/tfg-icons-/items-/icons-/items-icons-cursor"
       }
+      
     }
 }

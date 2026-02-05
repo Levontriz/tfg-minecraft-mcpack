@@ -9,6 +9,7 @@ import { fastTravelUi } from "./general_functions/fast_travel.js";
 import { clearInventory } from "./general_functions/clear_inventory.js";
 import { PAY_TO_USE_PHONES, PHONE_LEVELS, ADMINS, NOTIFY_ADMIN } from "./config.js";
 import { ParticleEffectsLibrary, ParticleEffectSequenceController, ParticleEffectSequence, CircleEffect, ParticleTypes, SphereEffect } from "./extensions/particles.js";
+import { rightClickEvent } from "./phones/prison_pda.js";
 
 // Particle Effects Setup (Temporary Code for Testing)
 
@@ -142,16 +143,6 @@ world.afterEvents.itemUse.subscribe((eventData) => {
       clearAllRightClick(source);
       return;
     }
-    
-    explodeId = effectsLibrary.createExplosion(position, ParticleTypes.BASIC_FLAME, {
-        radius: 2,
-        yOffset: 0,
-        particleCount: 500,
-        speed: 0.5,
-    });
-
-    effectsLibrary.activeEffects.push(explodeId);
-  
 
     whitelist.push(itemId);
     source.setDynamicProperty("ClearWhitelist", JSON.stringify(whitelist));
@@ -183,6 +174,12 @@ world.afterEvents.itemUse.subscribe((eventData) => {
       source.sendMessage("§c§lPlease use a non-stackable item and try again!");
       return;
     }
+  }
+
+  if (itemStack.typeId === "tfg:ppda") {
+    console.log("Prison PDA right-click detected, opening prison UI...");
+    rightClickEvent(eventData, notifier);
+    return;
   }
 
   if (PAY_TO_USE_PHONES.includes(itemStack.typeId)) {

@@ -18,7 +18,7 @@ export const CUSTOM_ITEM_OFFSET = {
 	// When adding custom items, update the count in current version
 	// Or create a new version for better tracking
 	v1: {
-		count: 11, // <-- Update this number when adding custom items
+		count: 12, // <-- Update this number when adding custom items
 		timestamp: Date.now(),
 		description: 'Initial version without custom items'
 	},

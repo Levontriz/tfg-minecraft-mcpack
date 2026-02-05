@@ -29,6 +29,10 @@ export const custom_content = {
 		 texture: 'textures/items/admin_pda',
 		 type: 'item'
 	},
+	'tfg:ppda': {
+		 texture: 'textures/items/prison_pda',
+		 type: 'item'
+	},
 	'tfg:head_icon': {
 		 texture: 'textures/tfg-icons-/items-/icons-/items-icons-head',
 		 type: 'item'
@@ -53,6 +57,7 @@ export const custom_content = {
 		 texture: 'textures/tfg-icons-/items-/icons-/items-icons-cursor',
 		 type: 'item'
 	},
+	
 	/*
 	'custom:block': {
 		 texture: 'minecraft:gold_block',
