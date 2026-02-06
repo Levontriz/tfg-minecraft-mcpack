@@ -17,7 +17,7 @@ export function clearInventory(player, Noah) {
     if (!item) continue;
 
     const itemName = item.typeId;
-    const isPhone = PAY_TO_USE_PHONES.includes(itemName) || itemName === "tfg:admin_pda";
+    const isPhone = PAY_TO_USE_PHONES.includes(itemName) || itemName === "tfg:admin_pda" || itemName === "tfg:ppda";
 
     if (!isPhone && !itemsToKeepJSON.includes(itemName)) {
       playerInventory.setItem(i, undefined);

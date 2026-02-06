@@ -16,4 +16,4 @@ export const PHONE_LEVELS = {
 export const ADMINS = ["Purtzle", "Levontriz2197"];
 
 // Primary player to receive moderation pings
-export const NOTIFY_ADMIN = "Levontriz2197";
+export const NOTIFY_ADMIN = "Purtzle";
