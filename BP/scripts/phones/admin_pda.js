@@ -12,8 +12,7 @@ function adminUi(player, Noah) {
   let CommandOrder = [];
 
   const adminUiPanel = new ActionFormData();
-  adminUiPanel.title("Admin");
-  adminUiPanel.body("What function to run?");
+  adminUiPanel.title("Admin PDA");
   adminUiPanel.button("Home", "textures/tfg-icons-/t-/4-/default-/t4-default-home");
   CommandOrder.push("Home");
   adminUiPanel.button("Speed", "textures/tfg-icons-/t-/4-/default-/t4-default-speed");
@@ -37,7 +36,7 @@ function adminUi(player, Noah) {
 
     if (command == "Speed") {
       player.runCommand("effect @s speed 30 255 true");
-      player.sendMessage("§l§aSpeed boost");
+      player.sendMessage("§7[§6!§7] §d255x speed for 30 seconds!");
     } else if (command == "ServerUtility") {
       serverUtil(player, Noah);
     } else if (command == "Bank") {
@@ -62,7 +61,6 @@ function serverUtil(player, Noah) {
 
   const serverUtilPanel = new ActionFormData();
   serverUtilPanel.title = "Server Utility"
-  serverUtilPanel.body = "What function to run?"
   serverUtilPanel.button("Inventory Check");
   CommandOrder.push("InventoryCheck");
   serverUtilPanel.button("Clear Lag");
@@ -77,6 +75,7 @@ function serverUtil(player, Noah) {
   CommandOrder.push("ClearConfig");
   serverUtilPanel.button("Set Home");
   CommandOrder.push("SetHome");
+  serverUtilPanel.body("§7Running snakeOS latest-stable");
 
   serverUtilPanel.show(player).then((response) => {
     let command = CommandOrder[response.selection];
@@ -87,7 +86,7 @@ function serverUtil(player, Noah) {
       player.runCommand("kill @e[type=wind_charge_projectile]");
       player.runCommand("kill @e[type=area_effect_cloud]");
       player.runCommand("kill @e[type=thrown_trident]");
-      player.sendMessage("§l§aRemoved all lag causing entities");
+      player.sendMessage("§7[§6!§7] §aCleared entity clutter!");
     } else if (command == "AddLore") {
       addLore(player);
     } else if (command == "ClearConfig") {
@@ -101,7 +100,7 @@ function serverUtil(player, Noah) {
       clearAllRightClick(player);
 
       player.setDynamicProperty("clearSignatures", true)
-      player.sendMessage("§l§aRight click a non-stackable item in your inventory to remove all signatures.")
+      player.sendMessage("§7[§6!§7] §aRight click a non-stackable item to wipe signatures!");
     } else if (command == "InventoryCheck") {
       viewPlayerInventory(player);
     }
@@ -114,7 +113,7 @@ function viewPlayerInventory(player) {
   // You'll need a way to target the *other* player, 
   // for simplicity this example checks the sender's own inventory
   const selectPlayerMenu = new ActionFormData();
-  selectPlayerMenu.title("Select Player to View Inventory");
+  selectPlayerMenu.title("Select Player");
   const onlinePlayers = world.getAllPlayers();
   const playerNames = onlinePlayers.map(p => p.name);
   for (const name of playerNames) {
@@ -142,7 +141,7 @@ function displayInventoryContents(commandPlayer, targetPlayer, moveSlot) {
       }
     }
     if (emptySlot === null) {
-      commandPlayer.sendMessage("§c§oNo empty slots in your inventory to move the item to.");
+      commandPlayer.sendMessage("§7[§6!§7] §cCould not take item, Your inventory is full!");
       displayInventoryContents(commandPlayer, targetPlayer, null);
       return;
     }
@@ -162,7 +161,7 @@ function displayInventoryContents(commandPlayer, targetPlayer, moveSlot) {
       const equippedItem = equippable.getEquipment(equipSlot);
 
       if (!equippedItem) {
-        commandPlayer.sendMessage("§c§oNo item equipped in that slot.");
+        commandPlayer.sendMessage("§7[§6!§7] §cArmor slot is empty!");
         displayInventoryContents(commandPlayer, targetPlayer, null);
         return;
       }
@@ -178,7 +177,7 @@ function displayInventoryContents(commandPlayer, targetPlayer, moveSlot) {
       const cursorComp = targetPlayer.getComponent("minecraft:cursor_inventory");
 
       if (!cursorComp || !cursorComp.item) {
-        commandPlayer.sendMessage("§c§oNo item in cursor slot.");
+        commandPlayer.sendMessage("§7[§6!§7] §cCursor slot is empty!");
         displayInventoryContents(commandPlayer, targetPlayer, null);
         return;
       }
@@ -199,14 +198,14 @@ function displayInventoryContents(commandPlayer, targetPlayer, moveSlot) {
       commandPlayerInventory.setItem(emptySlot, itemStack);
       displayInventoryContents(commandPlayer, targetPlayer, null);
     } else {
-      commandPlayer.sendMessage("§c§oItem not found in the specified slot.");
+      commandPlayer.sendMessage("§7[§6!§7] §cInventory slot is empty!");
       displayInventoryContents(commandPlayer, targetPlayer, null);
     }
     return;
   }
 
   if (inventory.length === 0) {
-    commandPlayer.sendMessage(`${targetPlayer.name}'s inventory is empty.`);
+    commandPlayer.sendMessage(`§7[§6!§7] ${targetPlayer.name}'s inventory is empty!`);
   }
 
   const chestForm = new ChestFormData('large');
@@ -277,7 +276,7 @@ function displayInventoryContents(commandPlayer, targetPlayer, moveSlot) {
 
     // Ignore clicks on the viewer's own inventory section
     if (response.inventorySlot !== null && response.inventorySlot !== undefined) {
-      commandPlayer.sendMessage("§c§oYou can't take items from your own inventory in this view.");
+      commandPlayer.sendMessage("§7[§6!§7] §cCannot take items from this inventory.");
       displayInventoryContents(commandPlayer, targetPlayer, null);
       return;
     }
@@ -286,12 +285,12 @@ function displayInventoryContents(commandPlayer, targetPlayer, moveSlot) {
     const allowedSpecialSlots = [45, 46, 47, 48, 49, 53];
 
     if (selectedSlot > 35 && !allowedSpecialSlots.includes(selectedSlot)) {
-      commandPlayer.sendMessage("§c§oInvalid slot selected.");
+      commandPlayer.sendMessage("§7[§6!§7] §cCannot take items from this slot.");
       displayInventoryContents(commandPlayer, targetPlayer, null);
       return;
     }
 
-    commandPlayer.sendMessage(`§l§aSelected slot ${selectedSlot} from ${targetPlayer.name}'s inventory.`);
+    commandPlayer.sendMessage(`§7[§6!§7] §aTaken slot ${selectedSlot} from ${targetPlayer.name}'s inventory.`);
     displayInventoryContents(commandPlayer, targetPlayer, selectedSlot);
   });
 
@@ -299,8 +298,7 @@ function displayInventoryContents(commandPlayer, targetPlayer, moveSlot) {
 
 function adminBankUi(player) {
   const bankSelectionUi = new ActionFormData();
-  bankSelectionUi.title(`Admin Bank Selector`);
-  bankSelectionUi.body("");
+  bankSelectionUi.title(`Admin Bank`);
   bankSelectionUi.button("Adjust Player", "textures/tfg-icons-/t-/4-/unused-/t4-unused-transfer")
   bankSelectionUi.button("Admin Logs", "textures/tfg-icons-/t-/4-/unused-/t4-unused-transactions")
 
@@ -317,7 +315,7 @@ function adminBankLogs(player) {
   let adminBankLogs = world.getDynamicProperty("adminBankLogs");
 
   if (adminBankLogs == null) {
-    player.sendMessage("§c§oNo bank logs found.");
+    player.sendMessage("§7[§6!§7] §cNo logs found!");
     return;
   }
 
@@ -327,7 +325,7 @@ function adminBankLogs(player) {
 
 
   const logUi = new ActionFormData();
-  logUi.title(`Admin Bank Logs`);
+  logUi.title(`Bank Logs`);
   logUi.body("");
 
   for (let i = bankLogJSON.length - 1; i >= 0; i--) {
@@ -340,17 +338,17 @@ function adminBankLogs(player) {
 function adminBankAdjustment(player) {
   const onlinePlayers = world.getAllPlayers();
   let uiPlayerListAdmin = [ /*{ name: player.name } */];
-  let CashV2 = world.scoreboard.getObjective("CashV2");
-  let playerCash = CashV2.getScore(player)
+  const cashDataRaw = world.getDynamicProperty("Cash");
+  const playerCash = cashDataRaw[player.name];
 
   for (let playerList of onlinePlayers) {
     let addToPlayerList = { name: playerList.name };
-
     uiPlayerListAdmin.push(addToPlayerList);
   }
 
   const bankUiPanel = new ModalFormData();
-  bankUiPanel.title(`Admin Bank (You currently have $${playerCash})`);
+  bankUiPanel.title(`Admin Bank`);
+  bankUiPanel.body(`Current balance: $${playerCash}`);
   bankUiPanel.dropdown(
     "Player",
     uiPlayerListAdmin.map((player) => player.name)
@@ -366,26 +364,29 @@ function adminBankAdjustment(player) {
     var amountInInt = parseInt(amountInString);
 
     if (isNaN(amountInInt)) {
-      player.sendMessage("§c§oInvalid amount. Please enter a valid number.");
+      player.sendMessage("§7[§6!§7] §cInvalid amount, please enter a whole number!");
       return;
     }
 
-    const CashV2 = world.scoreboard.getObjective("CashV2");
-    const targetCashV2 = CashV2.getScore(target);
+    const currentCashRaw = world.getDynamicProperty("Cash");
+    const currentCash = currentCashRaw ? JSON.parse(currentCashRaw) : {};
+    const targetCash = currentCash[target.name] ?? 0;
 
     if (!onOffToggle) {
-      CashV2.setScore(target, targetCashV2 + amountInInt)
-      player.sendMessage(`§l§aYou added §r§e$${amountInInt} §a§lto §r§7§o${target.name}`);
+      currentCash[target.name] = targetCash + amountInInt;
+      world.setDynamicProperty("Cash", JSON.stringify(currentCash));
+      player.sendMessage(`§7[§6!§7] §aIncreased §7§o${target.name}§r§a's balance by §e$${amountInInt}§a!`);
       player.playSound("note.pling");
-      target.sendMessage(`§6Server has adjusted your balance by §a+§e$${amountInInt}!`)
+      target.sendMessage(`§7[§6!§7] §a§lServer has adjusted your balance by §e+$${amountInInt}§4.`)
       // §6Server has adjusted your balance by §a+§f/§c-§e$100
       target.playSound("note.pling");
       // Since the toggle is off we dont change the "amountInInt" variable
     } else {
-      CashV2.setScore(target, targetCashV2 - amountInInt)
-      player.sendMessage(`§l§aYou removed §r§e$${amountInInt} §a§lfrom §r§7§o${target.name}`);
+      currentCash[target.name] = targetCash - amountInInt;
+      world.setDynamicProperty("Cash", JSON.stringify(currentCash));
+      player.sendMessage(`§7[§6!§7] §4Decreased §7§o${target.name}§r§4's balance by §e$${amountInInt}§4!`);
       player.playSound("note.pling");
-      target.sendMessage(`§6Server has adjusted your balance by §c-§e$${amountInInt}!`)
+      target.sendMessage(`§7[§6!§7] §a§lServer has adjusted your balance by §e-$${amountInInt}§4.`)
       target.playSound("note.pling");
       // Since the toggle is on we change the "amountInInt" variable to a negative number for easier logging
       amountInInt = -amountInInt;
@@ -465,7 +466,7 @@ function addLore(player) {
       clearAllRightClick(player);
       player.setDynamicProperty("loreToSet", JSON.stringify(loreToSet));
       player.setDynamicProperty("rightClickSetLore", true);
-      player.sendMessage("Right click an item to add the lore");
+      player.sendMessage("§7[§6!§7] §aRight click an item to add lore.");
     });
   });
 }
@@ -492,15 +493,15 @@ function debugMenu(player) {
       for (let id of player.getDynamicPropertyIds()) {
         player.setDynamicProperty(id);
       }
-      player.sendMessage("§l§aCleared all dynamic properties.")
+      player.sendMessage("§7[§6!§7] §4Cleared all dynamic properties.")
     }
     if (response.selection == 2) {
       player.setDynamicProperty("IncomingRequest", "[\"Levontriz2197\"]");
-      player.sendMessage("§l§aSet Incoming request to Levontriz2197.")
+      player.sendMessage("§7[§6!§7] §aSent Incoming request to Levontriz2197.")
     }
     if (response.selection == 3) {
       player.setDynamicProperty("OutgoingRequest", "[\"Levontriz2197\", \"Purtzle\"]");
-      player.sendMessage("§l§aSet Outgoing request to Levontriz2197.")
+      player.sendMessage("§7[§6!§7] §aSent outgoing request to Levontriz2197.")
     }
     if (response.selection == 4) {
       for (let id of world.getDynamicPropertyIds()) {
@@ -513,7 +514,7 @@ function debugMenu(player) {
         if (id == "Cash") continue;
         world.setDynamicProperty(id);
       }
-      player.sendMessage("§l§aCleared all dynamic properties from world.")
+      player.sendMessage("§7[§6!§7] §4Cleared all dynamic properties from world.")
     }
   });
 }
@@ -521,8 +522,6 @@ function debugMenu(player) {
 function givePhoneSigniture(player) {
   const onlinePlayers = world.getAllPlayers();
   let uiPlayerListAdmin = [ /*{ name: player.name } */];
-  let CashV2 = world.scoreboard.getObjective("CashV2");
-  let playerCash = CashV2.getScore(player)
 
   for (let playerList of onlinePlayers) {
     let addToPlayerList = { name: playerList.name };
@@ -545,7 +544,7 @@ function givePhoneSigniture(player) {
     player.setDynamicProperty("rightClickSignature", true);
     player.setDynamicProperty("playerToSign", uiPlayerListAdmin[targetPlayerId].name);
 
-    player.sendMessage("§l§aRight click a non-stackable item in your inventory to give it a player use signature.")
+    player.sendMessage("§7[§6!§7] §aRight click an item to register the signature.")
   })
 }
 

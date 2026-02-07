@@ -89,8 +89,21 @@ for (const sequenceData of tempSequencesList) {
 
 world.afterEvents.playerSpawn.subscribe((eventData) => {
   const { initialSpawn, player } = eventData;
+  // If "Cash" doesn't exist in world dynamics add it
+  if (!world.getDynamicProperty("Cash")) {
+    world.setDynamicProperty("Cash", "{}");
+  }
+  var playerCash = world.scoreboard.getObjective("CashV2").getScore(player);
+  if (playerCash || playerCash === 0) {
+    var cashData = JSON.parse(world.getDynamicProperty("Cash"));
+    cashData[player.name] = playerCash;
+    world.setDynamicProperty("Cash", JSON.stringify(cashData));
+    //remove cashv2 objective from player
+    world.scoreboard.getObjective("CashV2").removeParticipant(player);
+  }
   if (initialSpawn) {
     clearAllRightClick(player);
+    
   }
 });
 
@@ -110,7 +123,7 @@ world.afterEvents.itemUse.subscribe((eventData) => {
 
   if (rightClickSetLore) {
     selectedItem.setLore(loreToSet);
-    source.sendMessage("§l§aLore set!");
+    source.sendMessage("§7[§6!§7] §5§oLore set!");
     clearAllRightClick(source);
     return;
   }
@@ -129,9 +142,9 @@ world.afterEvents.itemUse.subscribe((eventData) => {
       const whitelist = JSON.stringify([itemId]);
       source.setDynamicProperty("ClearWhitelist", whitelist);
       if (itemId === "tfg:aphone") {
-        source.sendMessage("§l§6aPhone §aadded to whitelist");
+        source.sendMessage("§l§6aPhone §aadded to whitelist"); // WTF??
       } else {
-        source.sendMessage(`§l§6${itemName} §aadded to whitelist`);
+        source.sendMessage(`§7[§6!§7] §f§o${itemName} §r§aadded to whitelist!`);
       }
       clearAllRightClick(source);
       return;
@@ -139,17 +152,17 @@ world.afterEvents.itemUse.subscribe((eventData) => {
 
     const whitelist = JSON.parse(playerWhitelist);
     if (whitelist.includes(itemId)) {
-      source.sendMessage("§l§aItem is already in your whitelist!");
+      source.sendMessage("§7[§6!§7] §cItem is already in your whitelist!");
       clearAllRightClick(source);
       return;
     }
 
-    whitelist.push(itemId);
+    whitelist.push(itemId);  // AND THEN A SECOND TIMEEEEEEEEEEEEEEEEEEEE
     source.setDynamicProperty("ClearWhitelist", JSON.stringify(whitelist));
     if (itemId === "tfg:aphone") {
       source.sendMessage("§l§6aPhone §aadded to whitelist");
     } else {
-      source.sendMessage(`§l§6${itemName} §aadded to whitelist`);
+      source.sendMessage(`§7[§6!§7] §f§o${itemName} §r§aadded to whitelist!`);
     }
     clearAllRightClick(source);
     return;
@@ -159,7 +172,7 @@ world.afterEvents.itemUse.subscribe((eventData) => {
     clearAllRightClick(source);
     selectedItem.clearDynamicProperties();
     selectedItem.setLore([]);
-    source.sendMessage("§l§aSuccessfully cleared all data");
+    source.sendMessage("§7[§6!§7] §4Phone signature wiped!");
     return;
   }
 
@@ -167,11 +180,11 @@ world.afterEvents.itemUse.subscribe((eventData) => {
     try {
       selectedItem.setDynamicProperty("Owner", playerToSign);
       selectedItem.setLore([`Owned by ${playerToSign}`]);
-      source.sendMessage("§l§aPlayer successfully added to dynamic property");
+      source.sendMessage("§7[§6!§7] §aPhone signature set!");
       clearAllRightClick(source);
       return;
     } catch (error) {
-      source.sendMessage("§c§lPlease use a non-stackable item and try again!");
+      source.sendMessage("§7[§6!§7] §cInvalid item!");
       return;
     }
   }
@@ -184,8 +197,8 @@ world.afterEvents.itemUse.subscribe((eventData) => {
 
   if (PAY_TO_USE_PHONES.includes(itemStack.typeId)) {
     if (!selectedItem.getDynamicPropertyIds().includes("Owner")) {
-      source.sendMessage("§c§lThis PDA has not been signed yet, stop trying to cheat items in!");
-      if (notifier) notifier.sendMessage(`§7§o${source.name} just tried to use an unsigned phone!`);
+      source.sendMessage("§7[§6!§7] §cThis PDA is non-functional, please give it to a server operator!");
+      if (notifier) notifier.sendMessage(`§7[§u!§7] §c§o${source.name} attempted to open an unregistered pda!`);
       return;
     }
 
@@ -197,8 +210,8 @@ world.afterEvents.itemUse.subscribe((eventData) => {
       return;
     }
 
-    source.sendMessage("§c§lThis PDA belongs to another player. You have been reported to an admin!");
-    if (notifier) notifier.sendMessage(`§7§o${source.name} tried to use a phone assigned to ${signature}!`);
+    source.sendMessage("§7[§6!§7] §cThis PDA belongs to someone else, you cannot use it!");
+    if (notifier) notifier.sendMessage(`§7[§u!§7] §c§o${source.name} attempted to use ${signature}'s pda!`);
     return;
   }
 
@@ -212,8 +225,8 @@ world.afterEvents.itemUse.subscribe((eventData) => {
       adminUi(source, notifier);
       return;
     }
-    source.sendMessage("§c§oYou must be an admin to use this item!");
-    if (notifier) notifier.sendMessage(`§7§o${source.name} just tried to use an admin phone.`);
+    source.sendMessage("§7[§6!§7] §cYou must be a server operator to use this item!");
+    if (notifier) notifier.sendMessage(`§7[§u!§7] §c§o${source.name} just tried to use an admin pda!`);
   }
 });
 
@@ -221,7 +234,6 @@ function mainUi(player, notifier, level) {
   const commandOrder = [];
   const ui = new ActionFormData();
   ui.title("Home Screen");
-  ui.body("");
 
   if (level >= 3) {
     ui.button("Home", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-home`);
@@ -263,8 +275,8 @@ function mainUi(player, notifier, level) {
       settingsMenu(player, notifier, level);
     } else if (command === "Speed") {
       player.runCommand("effect @s speed 10 100 true");
-      player.sendMessage("§l§aSpeed boost");
-      if (notifier) notifier.sendMessage(`§7§o${player.name} activated Speed Boost.`);
+      player.sendMessage("§7[§6!§7] §d100x speed for 10 seconds!");
+      if (notifier) notifier.sendMessage(`§7[§u!§7] §o${player.name} activated speed boost.`);
     }
   });
 }

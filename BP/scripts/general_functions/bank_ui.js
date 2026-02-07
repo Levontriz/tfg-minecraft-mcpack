@@ -3,8 +3,6 @@ import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 
 export function bankUi(player, Noah, level) {
   const bank = new ActionFormData();
-  const cashObjective = world.scoreboard.getObjective("CashV2");
-  const playerCash = cashObjective.getScore(player);
 
   bank.title("Bank");
   bank.button("Transfer", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-transfer`);
@@ -73,8 +71,9 @@ function bankLogs(player) {
 function transfer(player, Noah) {
   const onlinePlayers = world.getAllPlayers();
   const uiPlayerList = [];
-  const cashObjective = world.scoreboard.getObjective("CashV2");
-  const playerCash = cashObjective.getScore(player);
+  const cashDataRaw = world.getDynamicProperty("Cash");
+  const cashData = cashDataRaw ? JSON.parse(cashDataRaw) : {};
+  const playerCash = cashData[player.name] ?? 0;
 
   for (const playerList of onlinePlayers) {
     if (playerList.name === player.name) continue;
@@ -102,8 +101,12 @@ function transfer(player, Noah) {
     }
     player.sendMessage(`§l§aTransferring §r§e$${amountToTransferInt} §a§lto §r§7§o${uiPlayerList[playerTransaction].name}`);
 
-    const transferTargetCash = cashObjective.getScore(transferTarget);
-    if (playerCash < amountToTransferInt) {
+    const currentCashRaw = world.getDynamicProperty("Cash");
+    const currentCash = currentCashRaw ? JSON.parse(currentCashRaw) : {};
+    const senderCash = currentCash[player.name] ?? 0;
+    const transferTargetCash = currentCash[transferTarget.name] ?? 0;
+
+    if (senderCash < amountToTransferInt) {
       player.sendMessage("§c§oInsufficient funds.");
       return;
     }
@@ -112,8 +115,9 @@ function transfer(player, Noah) {
       return;
     }
 
-    cashObjective.setScore(player, playerCash - amountToTransferInt);
-    cashObjective.setScore(transferTarget, transferTargetCash + amountToTransferInt);
+    currentCash[player.name] = senderCash - amountToTransferInt;
+    currentCash[transferTarget.name] = transferTargetCash + amountToTransferInt;
+    world.setDynamicProperty("Cash", JSON.stringify(currentCash));
 
     let transferTargetBankLogs = transferTarget.getDynamicProperty("BankLogs");
     const sendersLog = {
