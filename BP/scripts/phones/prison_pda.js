@@ -8,6 +8,13 @@ function positionsEqual(a, b) {
 
 function rightClickEvent(event, notifier) {
     const { source, itemStack } = event;
+    
+    // Stop non-admins from using prison pda
+    if (!ADMINS.includes(source.name)) {
+        source.sendMessage("§c§oYou must be an admin to use this item!");
+        if (notifier) notifier.sendMessage(`§7§o${source.name} just tried to use an admin phone.`);
+        return;
+    }
 
     // Second click after selecting first door block: finalize door region
     if (source.getDynamicProperty("PrisonDoorBlockPos1")) {
@@ -69,12 +76,7 @@ function rightClickEvent(event, notifier) {
         source.setDynamicProperty("PrisonDoorName");
         return;
     }
-    // Stop non-admins from using prison pda
-    if (!ADMINS.includes(source.name)) {
-        source.sendMessage("§c§oYou must be an admin to use this item!");
-        if (notifier) notifier.sendMessage(`§7§o${source.name} just tried to use an admin phone.`);
-        return;
-    }
+    
 
     // Quick use: if looking at a configured door, temporarily open it without showing UI
     const viewHit = source.getBlockFromViewDirection({ includeFluidBlocks: false });
@@ -462,8 +464,6 @@ function temporarilyToggleDoor(player, notifier, doorEntry, autoClose = false) {
                 player.dimension.runCommand(
                     `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} ${blockType} 0 replace air 0`
                 );
-                player.sendMessage(`§a§lDoor '${doorName}' has been closed.`);
-                notifier?.sendMessage?.(`Prison PDA: '${doorName}' auto-closed after temporary open.`);
             } catch (e) {
                 // Dimension/player may no longer be valid; ignore
             }
