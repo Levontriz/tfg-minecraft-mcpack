@@ -75,7 +75,6 @@ function serverUtil(player, Noah) {
   CommandOrder.push("ClearConfig");
   serverUtilPanel.button("Set Home");
   CommandOrder.push("SetHome");
-  serverUtilPanel.body("§7Running snakeOS latest-stable");
 
   serverUtilPanel.show(player).then((response) => {
     let command = CommandOrder[response.selection];

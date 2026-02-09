@@ -6,7 +6,7 @@ export function clearInventory(player, Noah) {
   const itemsToKeep = player.getDynamicProperty("ClearWhitelist");
 
   if (itemsToKeep === undefined) {
-    player.sendMessage("§a§lWe suggest having at least 1 item to keep! Although all phones are kept during a clear, please specify your phone as an item to keep or set any item as an item to keep to ignore this notification!");
+    player.sendMessage("§7[§6!§7] §cClearing without a whitelist is not recommended! Please configure one in the settings app. Phones are never cleared but you can add it anyway to disable this message.");
     return;
   }
 
@@ -24,6 +24,6 @@ export function clearInventory(player, Noah) {
     }
   }
 
-  player.sendMessage("§l§aCleared inventory!");
-  Noah.sendMessage(`§7§o${player.name} cleared inventory.`);
+  player.sendMessage("§7[§6!§7] §aCleared inventory!");
+  Noah.sendMessage(`§7[§u!§7] §o${player.name} cleared inventory.`);
 }

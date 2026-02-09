@@ -142,9 +142,10 @@ world.afterEvents.itemUse.subscribe((eventData) => {
       const whitelist = JSON.stringify([itemId]);
       source.setDynamicProperty("ClearWhitelist", whitelist);
       if (itemId === "tfg:aphone") {
-        source.sendMessage("§l§6aPhone §aadded to whitelist"); // WTF??
+        source.sendMessage("§l§6aPhone §aadded to whitelist"); // I get it now, its bc the a is lowercase lolololol
       } else {
         source.sendMessage(`§7[§6!§7] §f§o${itemName} §r§aadded to whitelist!`);
+        if (notifier) notifier.sendMessage(`§7[§u!§7] §c§o${source.name} added ${itemName} to their whitelist.`); // may as well since there's already one for removing it
       }
       clearAllRightClick(source);
       return;
@@ -180,7 +181,7 @@ world.afterEvents.itemUse.subscribe((eventData) => {
     try {
       selectedItem.setDynamicProperty("Owner", playerToSign);
       selectedItem.setLore([`Owned by ${playerToSign}`]);
-      source.sendMessage("§7[§6!§7] §aPhone signature set!");
+      source.sendMessage(`§7[§6!§7] §aPhone registered to ${playerToSign}!`);
       clearAllRightClick(source);
       return;
     } catch (error) {
@@ -190,7 +191,6 @@ world.afterEvents.itemUse.subscribe((eventData) => {
   }
 
   if (itemStack.typeId === "tfg:ppda") {
-    console.log("Prison PDA right-click detected, opening prison UI...");
     rightClickEvent(eventData, notifier);
     return;
   }
@@ -198,7 +198,7 @@ world.afterEvents.itemUse.subscribe((eventData) => {
   if (PAY_TO_USE_PHONES.includes(itemStack.typeId)) {
     if (!selectedItem.getDynamicPropertyIds().includes("Owner")) {
       source.sendMessage("§7[§6!§7] §cThis PDA is non-functional, please give it to a server operator!");
-      if (notifier) notifier.sendMessage(`§7[§u!§7] §c§o${source.name} attempted to open an unregistered pda!`);
+      if (notifier) notifier.sendMessage(`§7[§u!§7] §c§o${source.name} attempted to use an unregistered pda!`);
       return;
     }
 
@@ -226,7 +226,7 @@ world.afterEvents.itemUse.subscribe((eventData) => {
       return;
     }
     source.sendMessage("§7[§6!§7] §cYou must be a server operator to use this item!");
-    if (notifier) notifier.sendMessage(`§7[§u!§7] §c§o${source.name} just tried to use an admin pda!`);
+    if (notifier) notifier.sendMessage(`§7[§u!§7] §c§o${source.name} attempted to use an admin pda!`);
   }
 });
 
@@ -276,7 +276,7 @@ function mainUi(player, notifier, level) {
     } else if (command === "Speed") {
       player.runCommand("effect @s speed 10 100 true");
       player.sendMessage("§7[§6!§7] §d100x speed for 10 seconds!");
-      if (notifier) notifier.sendMessage(`§7[§u!§7] §o${player.name} activated speed boost.`);
+      if (notifier) notifier.sendMessage(`§7[§u!§7] §o${player.name} enabled speed boost.`);
     }
   });
 }

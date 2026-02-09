@@ -20,7 +20,7 @@ export function bankUi(player, Noah, level) {
 function bankLogs(player) {
   const bankLog = player.getDynamicProperty("BankLogs");
   if (bankLog == null) {
-    player.sendMessage("§c§oNo bank logs found.");
+    player.sendMessage("§7[§6!§7] §cLogs not found!");
     return;
   }
 
@@ -51,16 +51,16 @@ function bankLogs(player) {
     if (logOrderDetails[response.selection].reciever != null) {
       const reciever = logOrderDetails[response.selection].reciever;
       if (note) {
-        logDetails.body(`§l§aYou sent §c${-cashUsed} §ato §6${reciever} §awith the note:\n§d${note}`);
+        logDetails.body(`§7Sent: §c§l$${-cashUsed}§r\n§7To: §6${reciever}§r\n§7Note: "§8§o${note}§r§7"`);
       } else {
-        logDetails.body(`§l§aYou sent §c${-cashUsed} §ato §6${reciever}`);
+        logDetails.body(`§7Sent: §c§l$${-cashUsed}§r\n§7To: §6${reciever}`);
       }
     } else {
       const sender = logOrderDetails[response.selection].sender;
       if (note) {
-        logDetails.body(`§l§aYou recieved ${cashUsed} §afrom §6${sender} §awith the note:\n§d${note}`);
+        logDetails.body(`§7Received: §a§l$${cashUsed}§r\n§7From: §6${sender}§r\n§7Note: "§8§o${note}§r§7"`);
       } else {
-        logDetails.body(`§l§aYou recieved ${cashUsed} §afrom §6${sender}`);
+        logDetails.body(`§7Received: §a§l$${cashUsed}§r\n§7From: §6${sender}`);
       }
     }
     logDetails.button("Close");
@@ -81,10 +81,11 @@ function transfer(player, Noah) {
   }
 
   const transferUi = new ModalFormData();
-  transferUi.title(`Bank (Your cash is $${playerCash})`);
+  transferUi.title(`Transfer`);
+  transferUi.body(`Current balance: $${playerCash}`);
   transferUi.dropdown("Player", uiPlayerList.map((p) => p.name));
   transferUi.textField("Money", "Amount to transfer");
-  transferUi.textField("Note", "Note for reciever to read");
+  transferUi.textField("Note", "Optional - up to 32 characters");
 
   transferUi.show(player).then((response) => {
     const [playerTransaction, amountToTransferString, playerNote] = response.formValues;
@@ -92,14 +93,14 @@ function transfer(player, Noah) {
     let amountToTransferInt = parseInt(amountToTransferString);
 
     if (isNaN(amountToTransferInt)) {
-      player.sendMessage("§c§oInvalid amount. Please enter a valid number.");
+      player.sendMessage("§7[§6!§7] §cInvalid amount, please enter a whole number!");
       return;
     }
     if (playerNote.length > 32) {
-      player.sendMessage("§c§oNote must be less than 32 characters.");
+      player.sendMessage("§7[§6!§7] §cNote exceeded character limit!");
       return;
     }
-    player.sendMessage(`§l§aTransferring §r§e$${amountToTransferInt} §a§lto §r§7§o${uiPlayerList[playerTransaction].name}`);
+    player.sendMessage(`§7[§6!§7] §7Transferring §a§l$${amountToTransferInt} §r§7to §e${uiPlayerList[playerTransaction].name}§7...`);
 
     const currentCashRaw = world.getDynamicProperty("Cash");
     const currentCash = currentCashRaw ? JSON.parse(currentCashRaw) : {};
@@ -107,11 +108,11 @@ function transfer(player, Noah) {
     const transferTargetCash = currentCash[transferTarget.name] ?? 0;
 
     if (senderCash < amountToTransferInt) {
-      player.sendMessage("§c§oInsufficient funds.");
+      player.sendMessage("§§7[§6!§7] §cYou're broke!!!");
       return;
     }
     if (amountToTransferInt <= 0) {
-      player.sendMessage("§c§oInvalid amount. Please enter a positive number.");
+      player.sendMessage("§7[§6!§7] §cInvalid amount, please enter a positive number!");
       return;
     }
 
@@ -153,14 +154,14 @@ function transfer(player, Noah) {
       player.setDynamicProperty("BankLogs", JSON.stringify(playerBankLogs));
     }
 
-    player.sendMessage("§a§lFinished transaction");
+    player.sendMessage("§7[§6!§7] §aSuccessful transaction!");
     if (playerNote) {
-      transferTarget.sendMessage(`§l§aYou were transferred §r§e$${amountToTransferInt} §a§lfrom §r§7§o${player.name} §r§a§lwith the note §d${playerNote}!`);
+      transferTarget.sendMessage(`§7[§6!§7] §e${player.name} §7sent you §l§a$${amountToTransferInt} §r§7with the note "§o§d${playerNote}§r§7"!`);
     } else {
-      transferTarget.sendMessage(`§l§aYou were transferred §r§e$${amountToTransferInt} §a§lfrom §r§7§o${player.name}`);
+      transferTarget.sendMessage(`§7[§6!§7] §e${player.name} §7sent you §l§a$${amountToTransferInt}§r§7!`);
     }
     transferTarget.playSound("random.levelup");
     player.playSound("note.pling");
-    Noah.sendMessage(`§7§o${player.name} transferred ${amountToTransferInt} to ${uiPlayerList[playerTransaction].name}`);
+    Noah.sendMessage(`§7[§u!§7] §o${player.name} sent ${amountToTransferInt} to ${uiPlayerList[playerTransaction].name}.`);
   });
 }

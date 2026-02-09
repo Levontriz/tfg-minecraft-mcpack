@@ -29,8 +29,8 @@ export function fastTravelUi(player, Noah, level) {
       if (response.selection === i) {
         const { x, y, z } = locations[order[i]];
         player.teleport({ x, y, z }, { dimension: world.getDimension("overworld") });
-        player.sendMessage(`§l§aTeleported to ${order[i]}!`);
-        Noah.sendMessage(`§7§o${player.name} teleported to ${order[i]}.`);
+        player.sendMessage(`§7[§6!§7] §aTeleported to ${order[i]}!`);
+        Noah.sendMessage(`§7[§u!§7] §o${player.name} teleported to ${order[i]}.`);
       }
     }
     return;

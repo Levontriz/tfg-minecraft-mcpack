@@ -11,8 +11,8 @@ function rightClickEvent(event, notifier) {
     
     // Stop non-admins from using prison pda
     if (!ADMINS.includes(source.name)) {
-        source.sendMessage("§c§oYou must be an admin to use this item!");
-        if (notifier) notifier.sendMessage(`§7§o${source.name} just tried to use an admin phone.`);
+        source.sendMessage("§7[§6!§7] §cThis item is restricted to server operators.");
+        if (notifier) notifier.sendMessage(`§7[§u!§7] §c§o${source.name} attempted to use a prison pda!`);
         return;
     }
 
@@ -26,7 +26,7 @@ function rightClickEvent(event, notifier) {
         const pos2 = hit && hit.block ? hit.block.location : undefined;
 
         if (!pos2) {
-            source.sendMessage("§c§lLook at a valid block to finish the door selection.");
+            source.sendMessage("§7[§6!§7] §cPlease select a valid block!");
             return;
         }
 
@@ -59,11 +59,12 @@ function rightClickEvent(event, notifier) {
             );
         });
 
-        notifier?.sendMessage(
-            exists
-                ? "Door already exists!"
-                : `Door '${doorName}' does not exist, adding to list.`
-        );
+        if (exists) {
+            source.sendMessage(`§7[§6!§7] §cAn error occured trying to create §7§o${doorName}§r§c. It may already exist!`);
+        } else {
+            source.sendMessage(`§7[§6!§7] §aSuccessfully created §7§o${doorName}§r§a!`);
+            notifier?.sendMessage?.(`§7[§u!§7] §o'${doorName}' door created by ${source.name}.`);
+        }
 
         if (!exists) {
             const blockType = hit.block.typeId;
@@ -196,7 +197,7 @@ function prisonDoorUi(player, notifier) {
                     player.setDynamicProperty("PrisonDoorName", "Door");
                 }
 
-                player.sendMessage("§a§lFirst block and name saved. Look at the second block and use the Prison PDA again to finish the door.");
+                player.sendMessage("§7[§6!§7] §aSelect the second corner to create door.");
             });
             // Add block position to world dynamics prison door list (completed on second click)
         } else if (command === "remove") {
@@ -210,7 +211,7 @@ function prisonDoorUi(player, notifier) {
             }
 
             if (!Array.isArray(prisonDoorData) || prisonDoorData.length === 0) {
-                player.sendMessage("§c§lNo doors have been configured yet.");
+                player.sendMessage("§7[§6!§7] §cDoors not found!");
                 return;
             }
 
@@ -257,8 +258,8 @@ function prisonDoorUi(player, notifier) {
                     removedName = String(removed.name);
                 }
 
-                player.sendMessage(`§a§lRemoved door: ${removedName}`);
-                notifier?.sendMessage?.(`Prison PDA: ${player.name} removed door '${removedName}'.`);
+                player.sendMessage(`§7[§6!§7] §4Removed door: ${removedName}`);
+                notifier?.sendMessage?.(`§7[§u!§7] §oDoor '${removedName}' removed by ${player.name}.`);
             });
         } else if (command === "toggle") {
             // Open/Close door page: select door by name, then choose open or close
@@ -271,7 +272,7 @@ function prisonDoorUi(player, notifier) {
             }
 
             if (!Array.isArray(prisonDoorData) || prisonDoorData.length === 0) {
-                player.sendMessage("§c§lNo doors have been configured yet.");
+                player.sendMessage("§7[§6!§7] §cDoors not found!");
                 return;
             }
 
@@ -367,7 +368,7 @@ function prisonDoorUi(player, notifier) {
                 }
 
                 if (!pos1 || !pos2) {
-                    player.sendMessage("§c§lThis door entry is invalid.");
+                    player.sendMessage("§7[§6!§7] §cInvalid door entry!");
                     return;
                 }
 
@@ -400,15 +401,15 @@ function prisonDoorUi(player, notifier) {
                         player.dimension.runCommand(
                             `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} air 0 replace ${blockType} 0`
                         );
-                        player.sendMessage(`§a§lOpened door '${doorName}'.`);
-                        notifier?.sendMessage?.(`Prison PDA: ${player.name} opened door '${doorName}'.`);
+                        player.sendMessage(`§7[§6!§7] §a${doorName} door opened.`);
+                        notifier?.sendMessage?.(`§7[§u!§7] §o${player.name} opened the ${doorName} door.`);
                     } else if (actionSel === 1) {
                         // Close: replace air with the stored block type
                         player.dimension.runCommand(
                             `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} ${blockType} 0 replace air 0`
                         );
-                        player.sendMessage(`§a§lClosed door '${doorName}'.`);
-                        notifier?.sendMessage?.(`Prison PDA: ${player.name} closed door '${doorName}'.`);
+                        player.sendMessage(`§7[§6!§7] §a${doorName} door closed.`);
+                        notifier?.sendMessage?.(`§7[§u!§7] §o${player.name} closed the ${doorName} door.`);
                     }
                 });
             });
@@ -432,7 +433,7 @@ function temporarilyToggleDoor(player, notifier, doorEntry, autoClose = false) {
     }
 
     if (!pos1 || !pos2) {
-        player.sendMessage("§c§lThis door entry is invalid.");
+        player.sendMessage("§7[§6!§7] §cInvalid door entry!");
         return;
     }
 
@@ -454,8 +455,8 @@ function temporarilyToggleDoor(player, notifier, doorEntry, autoClose = false) {
     player.dimension.runCommand(
         `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} air 0 replace ${blockType} 0`
     );
-    player.sendMessage(`§a§lTemporarily opened door '${doorName}'.`);
-    notifier?.sendMessage?.(`Prison PDA: ${player.name} temporarily opened door '${doorName}'.`);
+    player.sendMessage(`§7[§6!§7] §a${doorName} door temporarily opened.`);
+    notifier?.sendMessage?.(`§7[§u!§7] §o${player.name} temporarily opened the ${doorName} door.`);
 
     if (autoClose) {
         // Close again after 5 seconds (100 ticks)

@@ -60,7 +60,7 @@ export function clearInventoryConfig(player, Noah) {
     const command = commandOrder[response.selection];
 
     if (command === "addItemToWhitelist") {
-      player.sendMessage("§l§6§oRight click §r§l§awhile holding §6§oany §r§l§aitem in your inventory to add every item of its type to your whitelist");
+      player.sendMessage("§7[§6!§7] Right click while holding an item to prevent it from being cleared.");
 
       clearAllRightClick(player);
       player.setDynamicProperty("rightClickAddItemToWhitelist", true);
@@ -78,8 +78,8 @@ export function clearInventoryConfig(player, Noah) {
         if (removeResponse.selection === 1) {
           playerWhitelistJSON = playerWhitelistJSON.filter(item => item !== command);
           player.setDynamicProperty("ClearWhitelist", JSON.stringify(playerWhitelistJSON));
-          player.sendMessage(`§l§cRemoved ${itemDisplayName} from whitelist!`);
-          Noah.sendMessage(`§7§o${player.name} removed ${itemDisplayName} from whitelist.`);
+          player.sendMessage(`§7[§6!§7] §f§o${itemDisplayName} §r§4removed from whitelist!`);
+          Noah.sendMessage(`§7[§u!§7] §o${player.name} removed ${itemDisplayName} from their whitelist.`);
         }
       });
     }
@@ -95,6 +95,6 @@ export function setHome(player, Noah) {
   homeY.setScore(player, Math.round(player.location.y));
   homeZ.setScore(player, Math.floor(player.location.z));
 
-  player.sendMessage("§l§aHome set successfully!");
-  Noah.sendMessage(`§7§o${player.name} set their home to ${homeX.getScore(player)}, ${homeY.getScore(player)}, ${homeZ.getScore(player)}!`);
+  player.sendMessage("§7[§6!§7] §aHome location set!");
+  Noah.sendMessage(`§7[§u!§7] §o${player.name} set their home to ${homeX.getScore(player)}, ${homeY.getScore(player)}, ${homeZ.getScore(player)}.`);
 }
