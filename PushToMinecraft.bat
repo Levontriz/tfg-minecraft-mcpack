@@ -5,12 +5,12 @@ echo ====================================
 echo.
 
 REM Source directories
-set "SOURCE_DIR=C:\Users\Levon\Desktop\Coding\Github\tfg-minecraft-mcpack"
+set "SOURCE_DIR=C:\Users\WINDOWS\Desktop\Coding\tfg-minecraft-mcpack"
 set "BP_SOURCE=%SOURCE_DIR%\BP"
 set "RP_SOURCE=%SOURCE_DIR%\RP"
 
 REM Destination directories
-set "MINECRAFT_BASE=C:\Users\Levon\AppData\Roaming\Minecraft Bedrock\Users\Shared\games\com.mojang"
+set "MINECRAFT_BASE=C:\Users\WINDOWS\AppData\Roaming\Minecraft Bedrock\Users\Shared\games\com.mojang"
 set "BP_DEST=%MINECRAFT_BASE%\development_behavior_packs\BP"
 set "RP_DEST=%MINECRAFT_BASE%\development_resource_packs\RP"
 

@@ -1,4 +1,4 @@
-import { world } from "@minecraft/server";
+import { system, world } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { adminUi } from "./phones/admin_pda.js";
 import { clearAllRightClick } from "./general_functions/clearAllRightClick.js";
@@ -7,84 +7,72 @@ import { settingsMenu } from "./general_functions/settings.js";
 import { bankUi } from "./general_functions/bank_ui.js";
 import { fastTravelUi } from "./general_functions/fast_travel.js";
 import { clearInventory } from "./general_functions/clear_inventory.js";
-import { PAY_TO_USE_PHONES, PHONE_LEVELS, ADMINS, NOTIFY_ADMIN } from "./config.js";
+import { VERSION, PAY_TO_USE_PHONES, PHONE_LEVELS, ADMINS, NOTIFY_ADMIN } from "./config.js";
 import { ParticleEffectsLibrary, ParticleEffectSequenceController, ParticleEffectSequence, CircleEffect, ParticleTypes, SphereEffect } from "./extensions/particles.js";
 import { rightClickEvent } from "./phones/prison_pda.js";
+import { tpaScreen } from "./general_functions/tpa.js";
+import { syncWaypointHudScores } from "./utils/fov.js";
 
-// Particle Effects Setup (Temporary Code for Testing)
-
-
-
-
-var tempSequencesList = [
-    {
-        name: "rings",
-        repeating: true,
-        sequence: {
-            0: {
-                type: "sphere",
-                position: { x: 5, y: -40, z: 0 },
-                particleType: ParticleTypes.BASIC_FLAME,
-                radius: 10,
-                yOffset: 1,
-                duration: 10,
-                particleCount: 200,
-                rotationSpeed: 0,
-            },
-            10: {
-                type: "sphere",
-                position: { x: 5, y: -40, z: 0 },
-                particleType: ParticleTypes.BASIC_FLAME,
-                radius: 8,
-                yOffset: 1,
-                duration: 10,
-                particleCount: 150,
-                rotationSpeed: 0,
-            },
-            20: {
-                type: "sphere",
-                position: { x: 5, y: -40, z: 0 },
-                particleType: ParticleTypes.BASIC_FLAME,
-                radius: 6,
-                yOffset: 1,
-                duration: 10,
-                particleCount: 100,
-                rotationSpeed: 0,
-            },
-        },
-    },
-];
-var circleId = NaN;
-var explodeId = NaN;
-const effectsLibrary = new ParticleEffectsLibrary();
-const sequenceController = new ParticleEffectSequenceController();
-for (const sequenceData of tempSequencesList) {
-    const sequence = new ParticleEffectSequence(sequenceData.repeating);
-    for (const [time, effectData] of Object.entries(sequenceData.sequence)) {
-        let effect;
-        switch (effectData.type) {
-            case "sphere":
-                effect = new SphereEffect(effectData.position, effectData.particleType, {
-                    radius: effectData.radius,
-                    yOffset: effectData.yOffset,
-                    duration: effectData.duration,
-                    particleCount: effectData.particleCount,
-                    rotationSpeed: effectData.rotationSpeed,
-                });
-                break;
-            default:
-                console.warn(`Unknown effect type: ${effectData.type}`);
-                continue;
-        }
-        sequence.addEffect(parseInt(time), effect);
+function ensureObjective(objectiveId) {
+  if (!world.scoreboard.getObjective(objectiveId)) {
+    try {
+      world.scoreboard.addObjective(objectiveId, objectiveId);
+    } catch (error) {
+      // If another script already created it, keep going.
     }
-    sequenceController.addSequence(sequence);
+  }
 }
 
+function getObjectiveScore(objectiveId, player) {
+  const objective = world.scoreboard.getObjective(objectiveId);
+  if (!objective) {
+    return undefined;
+  }
 
+  try {
+    return objective.getScore(player);
+  } catch (error) {
+    return undefined;
+  }
+}
 
+world.afterEvents.worldLoad.subscribe((event) => {
+    console.warn("World has successfully loaded!");
+    ensureObjective("homeX");
+    ensureObjective("homeY");
+    ensureObjective("homeZ");
+    ensureObjective("tfg_wp_x");
+    ensureObjective("tfg_wp_y");
+    ensureObjective("tfg_wp_depth");
+    ensureObjective("tfg_wp_visible");
+    system.runInterval(() => {
+      for (const player of world.getAllPlayers()) {
+        const homeX = getObjectiveScore("homeX", player);
+        const homeY = getObjectiveScore("homeY", player);
+        const homeZ = getObjectiveScore("homeZ", player);
 
+        if (homeX === undefined || homeY === undefined || homeZ === undefined) {
+          syncWaypointHudScores(player, player.location, { clamp: true });
+          continue;
+        }
 
+        syncWaypointHudScores(player, {
+          x: homeX + 0.5,
+          y: homeY,
+          z: homeZ + 0.5
+        }, {
+          clamp: true
+        });
+      }
+    }, 20);
+    console.warn("Checking pack version in world.");
+    if (VERSION !== world.getDynamicProperty("packVersion")) {
+        console.warn(`Pack version mismatch! Current: ${VERSION}, World: ${world.getDynamicProperty("packVersion")}`);
+        world.setDynamicProperty("packVersion", VERSION);
+    } else {
+        console.warn(`Pack version matches! Current: ${VERSION}, World: ${world.getDynamicProperty("packVersion")}`);
+    }
+});
 
 
 world.afterEvents.playerSpawn.subscribe((eventData) => {
@@ -93,7 +81,12 @@ world.afterEvents.playerSpawn.subscribe((eventData) => {
   if (!world.getDynamicProperty("Cash")) {
     world.setDynamicProperty("Cash", "{}");
   }
-  var playerCash = world.scoreboard.getObjective("CashV2").getScore(player);
+  try {
+    var playerCash = world.scoreboard.getObjective("CashV2").getScore(player);
+  } catch (error) {
+    console.warn("Error occurred while fetching player cash:", error);
+    console.warn("Most likely intended as this just moves CashV2 over to the dynamic property 'Cash' and removes the scoreboard objective.");
+  }
   if (playerCash || playerCash === 0) {
     var cashData = JSON.parse(world.getDynamicProperty("Cash"));
     cashData[player.name] = playerCash;
@@ -104,6 +97,15 @@ world.afterEvents.playerSpawn.subscribe((eventData) => {
   if (initialSpawn) {
     clearAllRightClick(player);
     
+    // Check if the player has the correct pack version
+    if (VERSION !== world.getDynamicProperty("packVersion")) {
+      if (world.getDynamicProperty("packVersion") === undefined) {
+        player.sendMessage(`Be careful little one, for this world somehow has an undefined pack version. Contact Levontriz or Purtzle because something has gone HORRIBLY wrong.`);
+      }
+      player.sendMessage(`§7[§6!§7] §cYour pack version is outdated! Please update to version ${VERSION}.`);
+      // Kick the player and give a reason using a world command
+      player.dimension.runCommand(`kick "${player.name}" "Your pack version is outdated! Please update to version ${VERSION}."`);
+    }
   }
 });
 
@@ -244,6 +246,10 @@ function mainUi(player, notifier, level) {
     ui.button("Speed", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-speed`);
     commandOrder.push("Speed");
   }
+  if (level >= 2) {
+    ui.button("TPA", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-tpa`);
+    commandOrder.push("TPA");
+  }
 
   ui.button("Fast Travel", `textures/tfg-icons-/t-/${level}-/default-/t${level}-default-fasttravel`);
   commandOrder.push("FT");
@@ -267,6 +273,8 @@ function mainUi(player, notifier, level) {
       fastTravelUi(player, notifier, level);
     } else if (command === "Bank") {
       bankUi(player, notifier, level);
+    } else if (command === "TPA") {
+      tpaScreen(player, notifier);
     } else if (command === "Clear") {
       clearInventory(player, notifier);
     } else if (command === "Home") {

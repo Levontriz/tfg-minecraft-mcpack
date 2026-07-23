@@ -4,7 +4,7 @@
       "description": {
         "identifier": "tfg:cobblestphone",
         "menu_category": { 
-        "category": "none"
+        "category": "equipment"
       }
       },
       "components": {

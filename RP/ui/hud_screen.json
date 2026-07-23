@@ -1,3 +1,24 @@
 {
-  
+	"namespace": "hud_waypoint",
+
+	"waypoint_icon": {
+		"type": "image",
+		"texture": "textures/ui/waypoint",
+		"size": [16, 16],
+		"anchor_from": "top_left",
+		"anchor_to": "top_left",
+		"offset": [0, 0],
+		"layer": 100,
+		"visible": true
+	},
+
+	"waypoint_hud": {
+		"type": "panel",
+		"size": ["100%", "100%"],
+		"controls": [
+			{
+				"waypoint_icon@hud_waypoint.waypoint_icon": {}
+			}
+		]
+	}
 }

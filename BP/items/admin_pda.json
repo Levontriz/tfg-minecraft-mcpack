@@ -4,7 +4,7 @@
       "description": {
         "identifier": "tfg:admin_pda",
         "menu_category": { 
-        "category": "none"
+        "category": "equipment"
       }
       },
       "components": {
