@@ -27,6 +27,7 @@ export function tpaScreen(player, Noah) {
 function openSendTpaForm(player, Noah) {
     // Get all players in the world (currently includes yourself, for testing)
     const uiPlayerList = world.getAllPlayers()
+        .filter(p => p.name != player.name)
         .map(p => p.name)
 
     const tpaUI = new ModalFormData();
