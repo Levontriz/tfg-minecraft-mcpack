@@ -3,7 +3,7 @@
 
 	"waypoint_icon": {
 		"type": "image",
-		"texture": "textures/ui/waypoint",
+		"texture": "textures/ui/black",
 		"size": [16, 16],
 		"anchor_from": "top_left",
 		"anchor_to": "top_left",

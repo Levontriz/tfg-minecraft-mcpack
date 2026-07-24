@@ -80,6 +80,11 @@ function transfer(player, Noah) {
     uiPlayerList.push({ name: playerList.name });
   }
 
+  if (uiPlayerList.length === 0) {
+    player.sendMessage("§7[§6!§7] §cNo other players online!");
+    return;
+  }
+
   const transferUi = new ModalFormData();
   transferUi.title(`Transfer`);
   transferUi.body(`Current balance: $${playerCash}`);

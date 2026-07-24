@@ -4,7 +4,7 @@
     "description": "The basic opperations of TFG server economy",
     "name": "TFG behaviour pack",
     "uuid": "b57fbf29-9437-4307-9b89-9593942d8121",
-    "version": [26, 2, 2],
+    "version": [26, 3, 2],
     "min_engine_version": [1, 13, 0]
   },
   "modules": [
@@ -12,20 +12,20 @@
       "description": "TFG Addon",
       "type": "data",
       "uuid": "e2ac1276-747e-4c08-895b-137014e1b245",
-      "version": [26, 2, 2]
+      "version": [26, 3, 2]
     },
     {
       "description": "Full Script",
       "type": "script",
       "uuid": "8758daec-7bac-4923-bcf0-c82a5706d7b3",
-      "version": [26, 2, 2],
+      "version": [26, 3, 2],
       "entry": "scripts/main.js"
     }
   ],
   "dependencies": [
     {
       "uuid": "1931c135-1cc8-4589-a99e-e496cb9b210f",
-      "version": [26, 2, 2]
+      "version": [26, 3, 2]
     },
     {
       "module_name": "@minecraft/server",

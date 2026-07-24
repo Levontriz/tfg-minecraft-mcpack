@@ -4,7 +4,7 @@
       "description": {
         "identifier": "tfg:aphone",
         "menu_category": { 
-        "category": "equipment"
+        "category": "none"
       }
       },
       "components": {

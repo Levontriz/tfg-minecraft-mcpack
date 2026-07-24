@@ -30,6 +30,11 @@ function openSendTpaForm(player, Noah) {
         .filter(p => p.name != player.name)
         .map(p => p.name)
 
+    if (uiPlayerList.length === 0) {
+        player.sendMessage("§7[§6!§7] §cNo other players online!");
+        return;
+    }
+
     const tpaUI = new ModalFormData();
     tpaUI.title("Send a TPA")
     tpaUI.dropdown("Player", uiPlayerList)
