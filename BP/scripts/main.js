@@ -7,11 +7,11 @@ import { settingsMenu } from "./general_functions/settings.js";
 import { bankUi } from "./general_functions/bank_ui.js";
 import { fastTravelUi } from "./general_functions/fast_travel.js";
 import { clearInventory } from "./general_functions/clear_inventory.js";
-import { VERSION, PAY_TO_USE_PHONES, PHONE_LEVELS, ADMINS, NOTIFY_ADMIN } from "./config.js";
+import { VERSION, PAYDAY_DEFAULTS, PAY_TO_USE_PHONES, PHONE_LEVELS, ADMINS, NOTIFY_ADMIN, WorldDyanmicPropertiesKey, PlayerDynamicPropertiesKey, ItemDynamicPropertiesKey } from "./config.js";
 import { ParticleEffectsLibrary, ParticleEffectSequenceController, ParticleEffectSequence, CircleEffect, ParticleTypes, SphereEffect } from "./extensions/particles.js";
 import { rightClickEvent } from "./phones/prison_pda.js";
 import { tpaScreen } from "./general_functions/tpa.js";
-import { syncWaypointHudScores } from "./utils/fov.js";
+import { startPaydayInterval } from "./general_functions/payday.js"
 
 function ensureObjective(objectiveId) {
   if (!world.scoreboard.getObjective(objectiveId)) {
@@ -41,45 +41,37 @@ world.afterEvents.worldLoad.subscribe((event) => {
     ensureObjective("homeX");
     ensureObjective("homeY");
     ensureObjective("homeZ");
-    ensureObjective("tfg_wp_x");
-    ensureObjective("tfg_wp_y");
-    ensureObjective("tfg_wp_depth");
-    ensureObjective("tfg_wp_visible");
-    system.runInterval(() => {
-      for (const player of world.getAllPlayers()) {
-        const homeX = getObjectiveScore("homeX", player);
-        const homeY = getObjectiveScore("homeY", player);
-        const homeZ = getObjectiveScore("homeZ", player);
 
-        if (homeX === undefined || homeY === undefined || homeZ === undefined) {
-          syncWaypointHudScores(player, player.location, { clamp: true });
-          continue;
-        }
-
-        syncWaypointHudScores(player, {
-          x: homeX + 0.5,
-          y: homeY,
-          z: homeZ + 0.5
-        }, {
-          clamp: true
-        });
-      }
-    }, 20);
-    console.warn("Checking pack version in world.");
-    if (VERSION !== world.getDynamicProperty("packVersion")) {
-        console.warn(`Pack version mismatch! Current: ${VERSION}, World: ${world.getDynamicProperty("packVersion")}`);
-        world.setDynamicProperty("packVersion", VERSION);
-    } else {
-        console.warn(`Pack version matches! Current: ${VERSION}, World: ${world.getDynamicProperty("packVersion")}`);
+    // Check if world already has PayDayDefault and IntervalDefault set, if not set them to the default values inside config.js
+    if (world.getDynamicProperty(WorldDyanmicPropertiesKey.PAYDAY_AMOUNT) === undefined) {
+      world.setDynamicProperty(WorldDyanmicPropertiesKey.PAYDAY_AMOUNT, PAYDAY_DEFAULTS.amount);
     }
+    if (world.getDynamicProperty(WorldDyanmicPropertiesKey.PAYDAY_INTERVAL) === undefined) {
+      world.setDynamicProperty(WorldDyanmicPropertiesKey.PAYDAY_INTERVAL, PAYDAY_DEFAULTS.interval);
+    }
+    if (world.getDynamicProperty(WorldDyanmicPropertiesKey.PAYDAY_ENABLED) === undefined) {
+      world.setDynamicProperty(WorldDyanmicPropertiesKey.PAYDAY_ENABLED, PAYDAY_DEFAULTS.enabled);
+    } 
+
+    
+
+    console.warn("Checking pack version in world.");
+    if (VERSION !== world.getDynamicProperty(WorldDyanmicPropertiesKey.PACK_VERSION)) {
+        console.warn(`Pack version mismatch! Current: ${VERSION}, World: ${world.getDynamicProperty(WorldDyanmicPropertiesKey.PACK_VERSION)}`);
+        world.setDynamicProperty(WorldDyanmicPropertiesKey.PACK_VERSION, VERSION);
+    } else {
+        console.warn(`Pack version matches! Current: ${VERSION}, World: ${world.getDynamicProperty(WorldDyanmicPropertiesKey.PACK_VERSION)}`);
+    }
+
+    startPaydayInterval();
 });
 
 
 world.afterEvents.playerSpawn.subscribe((eventData) => {
   const { initialSpawn, player } = eventData;
   // If "Cash" doesn't exist in world dynamics add it
-  if (!world.getDynamicProperty("Cash")) {
-    world.setDynamicProperty("Cash", "{}");
+  if (!world.getDynamicProperty(WorldDyanmicPropertiesKey.CASH)) {
+    world.setDynamicProperty(WorldDyanmicPropertiesKey.CASH, "{}");
   }
   try {
     var playerCash = world.scoreboard.getObjective("CashV2").getScore(player);
@@ -88,26 +80,26 @@ world.afterEvents.playerSpawn.subscribe((eventData) => {
     console.warn("Most likely intended as this just moves CashV2 over to the dynamic property 'Cash' and removes the scoreboard objective.");
   }
 
-  var cashDataRaw = world.getDynamicProperty("Cash");
+  var cashDataRaw = world.getDynamicProperty(WorldDyanmicPropertiesKey.CASH);
   var cashData = cashDataRaw ? JSON.parse(cashDataRaw) : {};
   if (playerCash || playerCash === 0) {
     cashData[player.name] = playerCash;
-    world.setDynamicProperty("Cash", JSON.stringify(cashData));
+    world.setDynamicProperty(WorldDyanmicPropertiesKey.CASH, JSON.stringify(cashData));
     //remove cashv2 objective from player
     world.scoreboard.getObjective("CashV2").removeParticipant(player);
   } else {
     // If the player doesn't have a cash score, ensure they have an entry in the dynamic property
     if (!cashData[player.name]) {
       cashData[player.name] = 0;
-      world.setDynamicProperty("Cash", JSON.stringify(cashData));
+      world.setDynamicProperty(WorldDyanmicPropertiesKey.CASH, JSON.stringify(cashData));
     }
   }
   if (initialSpawn) {
     clearAllRightClick(player);
     
     // Check if the player has the correct pack version
-    if (VERSION !== world.getDynamicProperty("packVersion")) {
-      if (world.getDynamicProperty("packVersion") === undefined) {
+    if (VERSION !== world.getDynamicProperty(WorldDyanmicPropertiesKey.PACK_VERSION)) {
+      if (world.getDynamicProperty(WorldDyanmicPropertiesKey.PACK_VERSION) === undefined) {
         player.sendMessage(`Be careful little one, for this world somehow has an undefined pack version. Contact Levontriz or Purtzle because something has gone HORRIBLY wrong.`);
       }
       player.sendMessage(`§7[§6!§7] §cYour pack version is outdated! Please update to version ${VERSION}.`);
@@ -123,12 +115,12 @@ world.afterEvents.itemUse.subscribe((eventData) => {
   const selectedItem = source.getComponent("inventory")?.container?.getSlot(source.selectedSlotIndex);
   if (!selectedItem) return;
 
-  const rightClickSignature = source.getDynamicProperty("rightClickSignature");
-  const playerToSign = source.getDynamicProperty("playerToSign");
-  const clearSignatures = source.getDynamicProperty("clearSignatures");
-  const rightClickAddItemToWhitelist = source.getDynamicProperty("rightClickAddItemToWhitelist");
-  const rightClickSetLore = source.getDynamicProperty("rightClickSetLore");
-  const loreToSetRaw = source.getDynamicProperty("loreToSet");
+  const rightClickSignature = source.getDynamicProperty(PlayerDynamicPropertiesKey.RIGHT_CLICK_SIGNATURE);
+  const playerToSign = source.getDynamicProperty(PlayerDynamicPropertiesKey.PLAYER_TO_SIGN);
+  const clearSignatures = source.getDynamicProperty(PlayerDynamicPropertiesKey.CLEAR_SIGNATURES);
+  const rightClickAddItemToWhitelist = source.getDynamicProperty(PlayerDynamicPropertiesKey.RIGHT_CLICK_ADD_ITEM_TO_WHITELIST);
+  const rightClickSetLore = source.getDynamicProperty(PlayerDynamicPropertiesKey.RIGHT_CLICK_SET_LORE);
+  const loreToSetRaw = source.getDynamicProperty(PlayerDynamicPropertiesKey.LORE_TO_SET);
   const loreToSet = loreToSetRaw ? JSON.parse(loreToSetRaw) : [];
 
   if (rightClickSetLore) {
@@ -146,11 +138,11 @@ world.afterEvents.itemUse.subscribe((eventData) => {
     }
 
     itemName = itemName.join(" ");
-    const playerWhitelist = source.getDynamicProperty("ClearWhitelist");
+    const playerWhitelist = source.getDynamicProperty(PlayerDynamicPropertiesKey.CLEAR_WHITELIST);
 
     if (playerWhitelist === undefined) {
       const whitelist = JSON.stringify([itemId]);
-      source.setDynamicProperty("ClearWhitelist", whitelist);
+      source.setDynamicProperty(PlayerDynamicPropertiesKey.CLEAR_WHITELIST, whitelist);
       if (itemId === "tfg:aphone") {
         source.sendMessage("§l§6aPhone §aadded to whitelist"); // I get it now, its bc the a is lowercase lolololol
       } else {
@@ -169,7 +161,7 @@ world.afterEvents.itemUse.subscribe((eventData) => {
     }
 
     whitelist.push(itemId);  // AND THEN A SECOND TIMEEEEEEEEEEEEEEEEEEEE
-    source.setDynamicProperty("ClearWhitelist", JSON.stringify(whitelist));
+    source.setDynamicProperty(PlayerDynamicPropertiesKey.CLEAR_WHITELIST, JSON.stringify(whitelist));
     if (itemId === "tfg:aphone") {
       source.sendMessage("§l§6aPhone §aadded to whitelist");
     } else {
@@ -189,7 +181,7 @@ world.afterEvents.itemUse.subscribe((eventData) => {
 
   if (rightClickSignature) {
     try {
-      selectedItem.setDynamicProperty("Owner", playerToSign);
+      selectedItem.setDynamicProperty(ItemDynamicPropertiesKey.OWNER, playerToSign);
       selectedItem.setLore([`Owned by ${playerToSign}`]);
       source.sendMessage(`§7[§6!§7] §aPhone registered to ${playerToSign}!`);
       clearAllRightClick(source);
@@ -206,13 +198,13 @@ world.afterEvents.itemUse.subscribe((eventData) => {
   }
 
   if (PAY_TO_USE_PHONES.includes(itemStack.typeId)) {
-    if (!selectedItem.getDynamicPropertyIds().includes("Owner")) {
+    if (!selectedItem.getDynamicPropertyIds().includes(ItemDynamicPropertiesKey.OWNER)) {
       source.sendMessage("§7[§6!§7] §cThis PDA is non-functional, please give it to a server operator!");
       if (notifier) notifier.sendMessage(`§7[§u!§7] §c§o${source.name} attempted to use an unregistered pda!`);
       return;
     }
 
-    const signature = selectedItem.getDynamicProperty("Owner");
+    const signature = selectedItem.getDynamicProperty(ItemDynamicPropertiesKey.OWNER);
     if (signature === source.name) {
       const phoneLevel = PHONE_LEVELS[itemStack.typeId];
       selectedItem.setLore([`Owned by ${signature}`]);
