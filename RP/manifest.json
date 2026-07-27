@@ -1,10 +1,10 @@
 {
     "format_version": 2,
     "header": {
-      "description": "",
-      "name": "JSON-UI",
+      "description": "Items & interfaces for the TFG mod.",
+      "name": "TFG Community Server Resources",
       "uuid": "1931c135-1cc8-4589-a99e-e496cb9b210f",
-      "version": [26, 4, 2],
+      "version": [26, 4, 3],
       "min_engine_version": [1, 13, 0]
      },
     "modules": [
@@ -12,7 +12,7 @@
         "description": "TFG Addon",
         "type": "resources",
         "uuid": "e1124353-fb1c-4bf9-b2cb-d6151da65ba4",
-        "version": [26, 4, 2]
+        "version": [26, 4, 3]
       }
     ]
    }

@@ -5,3 +5,5 @@
  * z Minor releases or bug fixes 
  * y Major release (Bit stuff like new phones or features)
  * x Year
+
+ ![Logo](logo.png)

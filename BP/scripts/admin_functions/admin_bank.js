@@ -87,7 +87,7 @@ function adminBankAdjustment(player) {
       world.setDynamicProperty("Cash", JSON.stringify(currentCash));
       player.sendMessage(`§7[§6!§7] §aIncreased §7§o${target.name}§r§a's balance by §e$${amountInInt}§a!`);
       player.playSound("note.pling");
-      target.sendMessage(`§7[§6!§7] §a§lServer has adjusted your balance by §e+$${amountInInt}§4.`)
+      target.sendMessage(`§7[§6!§7] §a§lServer has adjusted your balance by §e+$${amountInInt}§a.`)
       // §6Server has adjusted your balance by §a+§f/§c-§e$100
       target.playSound("note.pling");
       // Since the toggle is off we dont change the "amountInInt" variable
@@ -96,7 +96,7 @@ function adminBankAdjustment(player) {
       world.setDynamicProperty("Cash", JSON.stringify(currentCash));
       player.sendMessage(`§7[§6!§7] §4Decreased §7§o${target.name}§r§4's balance by §e$${amountInInt}§4!`);
       player.playSound("note.pling");
-      target.sendMessage(`§7[§6!§7] §a§lServer has adjusted your balance by §e-$${amountInInt}§4.`)
+      target.sendMessage(`§7[§6!§7] §a§lServer has adjusted your balance by §e-$${amountInInt}§a.`)
       target.playSound("note.pling");
       // Since the toggle is on we change the "amountInInt" variable to a negative number for easier logging
       amountInInt = -amountInInt;

@@ -168,6 +168,6 @@ function transfer(player, Noah) {
     }
     transferTarget.playSound("random.levelup");
     player.playSound("note.pling");
-    Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} sent ${amountToTransferInt} to ${uiPlayerList[playerTransaction].name}.`);
+    Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} sent $${amountToTransferInt} to ${uiPlayerList[playerTransaction].name}.`);
   });
 }

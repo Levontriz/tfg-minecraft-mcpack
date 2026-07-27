@@ -32,6 +32,7 @@ export function startPaydayInterval() {
     system.run(() => {
       try {
         overworld.runCommand("time set sunrise");
+        overworld.runCommand("execute at @a run playsound note.bell @a ~ ~ ~");
       } catch (error) {
         console.error("Failed to execute command: ", error);
       }

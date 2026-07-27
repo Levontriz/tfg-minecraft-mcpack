@@ -5,10 +5,10 @@ import { TPA_REQUEST_TIMEOUT } from "../config.js";
 export function tpaScreen(player, Noah) {
     // Create the screen that lets you select either send a tpa, view received requests, view sent requests
     const tpaScreenUI = new ActionFormData()
-    tpaScreenUI.title("TPA Options")
-    tpaScreenUI.button("Send a TPA request")
-    tpaScreenUI.button("View received TPA requests")
-    tpaScreenUI.button("View sent TPA requests")
+    tpaScreenUI.title("Teleport to a player")
+    tpaScreenUI.button("Send a teleport request")
+    tpaScreenUI.button("Incoming Requests")
+    tpaScreenUI.button("Outgoing Requests")
     tpaScreenUI.show(player).then((response) => {
         if (response.canceled) return;
         if (response.selection == 0) {
@@ -54,7 +54,7 @@ function openSendTpaForm(player, Noah) {
         )
 
         if (alreadyRequested) {
-            player.sendMessage("Yo yo whatever you are selling I aint buying yo (Cant send more than 1 tpa to a person)")
+            player.sendMessage("§7[§6!§7] §cYou have already made a request to this player!");
             return
         }
 
@@ -71,9 +71,9 @@ function openSendTpaForm(player, Noah) {
         const currentPlayers = world.getAllPlayers();
         const targetPlayer = currentPlayers.find(p => p.name == tpaRequest.reciever);
         if (targetPlayer) {
-            targetPlayer.sendMessage(`You have a new TPA request from ${tpaRequest.sender}`);
+            targetPlayer.sendMessage(`§7[§6!§7] §eIncoming teleport request from ${tpaRequest.sender}!`);
         }
-        player.sendMessage(`TPA request sent to ${tpaRequest.reciever}.`)
+        player.sendMessage(`§7[§6!§7] §aSent teleport request to ${tpaRequest.reciever}...`)
     })
 }
 
@@ -82,7 +82,7 @@ function viewReceivedTpas(player) {
     const receivedTPAs = validTpas.filter(tp => tp.reciever == player.name)
 
     if (receivedTPAs.length === 0) {
-        player.sendMessage("You have no pending TPA requests.");
+        player.sendMessage("§7[§6!§7] §cYou have no incoming requests.");
         return;
     }
 
@@ -116,16 +116,16 @@ function acceptOrDenyTpaRequest(player, tpa) {
         if (response.selection == 0) {
             // Accept the tpa request
             if (sender) {
-                sender.sendMessage(`Your TPA request to ${tpa.reciever} has been accepted!`);
+                sender.sendMessage(`§7[§6!§7] §eTeleported to ${tpa.reciever}!`);
                 sender.teleport(player.location);
                 shouldRemove = true;
             } else {
-                player.sendMessage(`${tpa.sender} isn't online, so the TPA couldn't go through.`);
+                player.sendMessage(`§7[§6!§7] §4TPA failed, ${tpa.sender} disconnected!`);
             }
         } else if (response.selection == 1) {
             // Deny the tpa request
             if (sender) {
-                sender.sendMessage(`Your TPA request to ${tpa.reciever} has been denied.`);
+                sender.sendMessage(`§7[§6!§7] §c${tpa.reciever} denied your teleport request.`);
             }
             shouldRemove = true;
         }
@@ -142,7 +142,7 @@ function viewSentTpas(player) {
     const sentTPAs = validTpas.filter(tp => tp.sender == player.name)
 
     if (sentTPAs.length === 0) {
-        player.sendMessage("You have no outgoing TPA requests.");
+        player.sendMessage("§7[§6!§7] §cYou have no outgoing TPA requests.");
         return;
     }
 
@@ -175,9 +175,9 @@ function cancelSentTpaRequest(player, tpa) {
             const currentPlayers = world.getAllPlayers();
             const receiver = currentPlayers.find(p => p.name == tpa.reciever);
             if (receiver) {
-                receiver.sendMessage(`${tpa.sender} cancelled their TPA request to you.`);
+                receiver.sendMessage(`§7[§6!§7] §c${tpa.sender}'s teleport request was cancelled.`);
             }
-            player.sendMessage(`Cancelled your TPA request to ${tpa.reciever}.`);
+            player.sendMessage(`§7[§6!§7] §cCancelled your teleport request to ${tpa.reciever}.`);
         }
         // selection == 1 (Back) just closes without changes
     })
@@ -198,7 +198,7 @@ function validateTPARequests(propertyID) {
             changed = true;
             const sender = currentPlayers.find(p => p.name == request.sender);
             if (sender) {
-                sender.sendMessage(`Yo yo whatever you were selling nobody wanted yo (Your tpa request to ${request.reciever} has expired.)`);
+                sender.sendMessage(`§7[§6!§7] §cYour teleport request to ${request.reciever} has expired.`);
             }
             return false;
         }
