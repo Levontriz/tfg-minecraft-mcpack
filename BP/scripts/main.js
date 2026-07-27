@@ -87,12 +87,20 @@ world.afterEvents.playerSpawn.subscribe((eventData) => {
     console.warn("Error occurred while fetching player cash:", error);
     console.warn("Most likely intended as this just moves CashV2 over to the dynamic property 'Cash' and removes the scoreboard objective.");
   }
+
+  var cashDataRaw = world.getDynamicProperty("Cash");
+  var cashData = cashDataRaw ? JSON.parse(cashDataRaw) : {};
   if (playerCash || playerCash === 0) {
-    var cashData = JSON.parse(world.getDynamicProperty("Cash"));
     cashData[player.name] = playerCash;
     world.setDynamicProperty("Cash", JSON.stringify(cashData));
     //remove cashv2 objective from player
     world.scoreboard.getObjective("CashV2").removeParticipant(player);
+  } else {
+    // If the player doesn't have a cash score, ensure they have an entry in the dynamic property
+    if (!cashData[player.name]) {
+      cashData[player.name] = 0;
+      world.setDynamicProperty("Cash", JSON.stringify(cashData));
+    }
   }
   if (initialSpawn) {
     clearAllRightClick(player);

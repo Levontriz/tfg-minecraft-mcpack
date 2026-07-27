@@ -468,7 +468,7 @@ function temporarilyToggleDoor(player, notifier, doorEntry, autoClose = false) {
             } catch (e) {
                 // Dimension/player may no longer be valid; ignore
             }
-        }, 40);
+        }, 100);
     }
 }
 

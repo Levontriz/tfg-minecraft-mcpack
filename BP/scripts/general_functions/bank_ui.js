@@ -87,13 +87,14 @@ function transfer(player, Noah) {
 
   const transferUi = new ModalFormData();
   transferUi.title(`Transfer`);
-  transferUi.body(`Current balance: $${playerCash}`);
+  transferUi.label(`Balance: §a$${playerCash}`);
   transferUi.dropdown("Player", uiPlayerList.map((p) => p.name));
   transferUi.textField("Money", "Amount to transfer");
   transferUi.textField("Note", "Optional - up to 32 characters");
 
   transferUi.show(player).then((response) => {
-    const [playerTransaction, amountToTransferString, playerNote] = response.formValues;
+    const [label, playerTransaction, amountToTransferString, playerNote] = response.formValues;
+    if (response.canceled || !response.formValues) return;
     const transferTarget = world.getAllPlayers().find((p) => p.name === uiPlayerList[playerTransaction].name);
     let amountToTransferInt = parseInt(amountToTransferString);
 
@@ -167,6 +168,6 @@ function transfer(player, Noah) {
     }
     transferTarget.playSound("random.levelup");
     player.playSound("note.pling");
-    Noah.sendMessage(`§7[§u!§7] §o${player.name} sent ${amountToTransferInt} to ${uiPlayerList[playerTransaction].name}.`);
+    Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} sent ${amountToTransferInt} to ${uiPlayerList[playerTransaction].name}.`);
   });
 }

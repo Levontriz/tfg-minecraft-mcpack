@@ -60,7 +60,7 @@ function serverUtil(player, Noah) {
   let CommandOrder = [];
 
   const serverUtilPanel = new ActionFormData();
-  serverUtilPanel.title = "Server Utility"
+  serverUtilPanel.title("Server Utility");
   serverUtilPanel.button("Inventory Check");
   CommandOrder.push("InventoryCheck");
   serverUtilPanel.button("Clear Lag");
@@ -338,28 +338,33 @@ function adminBankAdjustment(player) {
   const onlinePlayers = world.getAllPlayers();
   let uiPlayerListAdmin = [ /*{ name: player.name } */];
   const cashDataRaw = world.getDynamicProperty("Cash");
-  const playerCash = cashDataRaw[player.name];
+  const cashData = cashDataRaw ? JSON.parse(cashDataRaw) : {};
+  const playerCash = cashData[player.name];
 
   for (let playerList of onlinePlayers) {
     let addToPlayerList = { name: playerList.name };
     uiPlayerListAdmin.push(addToPlayerList);
   }
 
+  console.warn(JSON.stringify(uiPlayerListAdmin))
+
   const bankUiPanel = new ModalFormData();
   bankUiPanel.title(`Admin Bank`);
-  bankUiPanel.body(`Current balance: $${playerCash}`);
+  bankUiPanel.label(`Balance: §a$${playerCash}`);
   bankUiPanel.dropdown(
     "Player",
-    uiPlayerListAdmin.map((player) => player.name)
+    uiPlayerListAdmin.map((player) => player["name"])
   );
   bankUiPanel.toggle("Off: Add \nOn: Remove");
   bankUiPanel.textField("Money", "Amount to add/remove");
   bankUiPanel.show(player).then((response) => {
-    const [targetPlayerName, onOffToggle, amountInString] = response.formValues;
+    const [label, targetPlayerName, onOffToggle, amountInString] = response.formValues;
+    if (response.canceled || !response.formValues) return;
+
 
     const target = world
       .getAllPlayers()
-      .find((player) => player.name === uiPlayerListAdmin[targetPlayerName].name);
+      .find((player) => player.name === uiPlayerListAdmin[targetPlayerName]["name"]);
     var amountInInt = parseInt(amountInString);
 
     if (isNaN(amountInInt)) {

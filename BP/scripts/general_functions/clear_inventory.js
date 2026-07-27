@@ -25,5 +25,5 @@ export function clearInventory(player, Noah) {
   }
 
   player.sendMessage("§7[§6!§7] §aCleared inventory!");
-  Noah.sendMessage(`§7[§u!§7] §o${player.name} cleared inventory.`);
+  Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} cleared inventory.`);
 }

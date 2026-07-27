@@ -79,7 +79,7 @@ export function clearInventoryConfig(player, Noah) {
           playerWhitelistJSON = playerWhitelistJSON.filter(item => item !== command);
           player.setDynamicProperty("ClearWhitelist", JSON.stringify(playerWhitelistJSON));
           player.sendMessage(`§7[§6!§7] §f§o${itemDisplayName} §r§4removed from whitelist!`);
-          Noah.sendMessage(`§7[§u!§7] §o${player.name} removed ${itemDisplayName} from their whitelist.`);
+          Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} removed ${itemDisplayName} from their whitelist.`);
         }
       });
     }
@@ -96,5 +96,5 @@ export function setHome(player, Noah) {
   homeZ.setScore(player, Math.floor(player.location.z));
 
   player.sendMessage("§7[§6!§7] §aHome location set!");
-  Noah.sendMessage(`§7[§u!§7] §o${player.name} set their home to ${homeX.getScore(player)}, ${homeY.getScore(player)}, ${homeZ.getScore(player)}.`);
+  Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} set their home to ${homeX.getScore(player)}, ${homeY.getScore(player)}, ${homeZ.getScore(player)}.`);
 }

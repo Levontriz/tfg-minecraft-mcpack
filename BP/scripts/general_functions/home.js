@@ -7,7 +7,7 @@ export function home(player, Noah) {
 
   if (homeX.getScore(player) === 0 || homeY.getScore(player) === 0 || homeZ.getScore(player) === 0) {
     player.sendMessage("§7[§6!§7] §cSet this as your home location in the settings app!");
-    Noah.sendMessage(`§7[§u!§7] §o${player.name} tried to teleport home but hasn't set one.`);
+    Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} tried to teleport home but hasn't set one.`);
     return;
   }
 
@@ -16,5 +16,5 @@ export function home(player, Noah) {
     { dimension: world.getDimension("overworld") }
   );
   player.sendMessage("§7[§6!§7] §aTeleported to your home!");
-  Noah.sendMessage(`§7[§u!§7] §o${player.name} teleported to ${homeX.getScore(player)}, ${homeY.getScore(player)}, ${homeZ.getScore(player)}.`);
+  Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} teleported to ${homeX.getScore(player)}, ${homeY.getScore(player)}, ${homeZ.getScore(player)}.`);
 }
