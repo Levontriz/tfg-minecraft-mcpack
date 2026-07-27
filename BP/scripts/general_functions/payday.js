@@ -25,8 +25,8 @@ export function startPaydayInterval() {
         continue; // Skip giving payday to the player named "Purtzle"
       }
       cashData[player.name] = (cashData[player.name] ?? 0) + paydayAmount;
-      player.sendMessage("[Server] §a§lPayday!");
     }
+    world.sendMessage("[Server] §a§lPayday!");
 
     const overworld = world.getDimension("overworld");
     system.run(() => {
