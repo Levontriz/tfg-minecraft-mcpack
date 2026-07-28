@@ -15,14 +15,20 @@ export function tpaScreen(player, Noah) {
             openSendTpaForm(player, Noah)
         } else if (response.selection == 1) {
             // View received TPA requests
-            viewReceivedTpas(player)
+            viewReceivedTpas(player, Noah)
         } else if (response.selection == 2) {
             // View sent TPA requests
-            viewSentTpas(player)
+            viewSentTpas(player, Noah)
         }
     })
 
 }
+
+// ###########################################
+// # ╔═══ ╔══╗ ╔╗ ╖ ╔══╕     ══╦══ ╔══╗ ╔══╗ #
+// # ╚══╗ ╠══╝ ║╚╗║ ║  ║       ║   ╠══╝ ╠══╣ #
+// # ═══╝ ╚═══ ╙ ╚╝ ╚══╛       ╙   ╙    ╙  ╜ #
+// ###########################################
 
 function openSendTpaForm(player, Noah) {
     // Get all players in the world (currently includes yourself, for testing)
@@ -74,10 +80,17 @@ function openSendTpaForm(player, Noah) {
             targetPlayer.sendMessage(`§7[§6!§7] §eIncoming teleport request from ${tpaRequest.sender}!`);
         }
         player.sendMessage(`§7[§6!§7] §aSent teleport request to ${tpaRequest.reciever}...`)
+        Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} sent a teleport request to ${tpaRequest.reciever}.`);
     })
 }
 
-function viewReceivedTpas(player) {
+// ##################################################################
+// # ╗  ╔ ═╦═ ╔══╗ ╓ ╓ ╓     ╔══╗ ╔══╗ ╔═══ ═╦═ ╔══╗ ╗  ╔ ╔══╗ ╔══╕ #
+// # ╚╗╔╝  ║  ╠══╝ ║ ║ ║     ╠═╦╝ ╠══╝ ║     ║  ╠══╝ ╚╗╔╝ ╠══╝ ║  ║ #
+// #  ╚╝  ═╩═ ╚═══ ╚═╩═╝     ╙ ╚  ╚═══ ╚═══ ═╩═ ╚═══  ╚╝  ╚═══ ╚══╛ #
+// ##################################################################
+
+function viewReceivedTpas(player, Noah) {
     const validTpas = validateTPARequests("OutgoingTPARequests")
     const receivedTPAs = validTpas.filter(tp => tp.reciever == player.name)
 
@@ -94,11 +107,11 @@ function viewReceivedTpas(player) {
     recievedTPAUI.show(player).then((response) => {
         if (response.canceled) return;
         // Run a function that will ask if they want to accept or deny the tpa request
-        acceptOrDenyTpaRequest(player, receivedTPAs[response.selection])
+        acceptOrDenyTpaRequest(player, receivedTPAs[response.selection], Noah)
     })
 }
 
-function acceptOrDenyTpaRequest(player, tpa) {
+function acceptOrDenyTpaRequest(player, tpa, Noah) {
     const acceptOrDenyUI = new ActionFormData()
     acceptOrDenyUI.title(`TPA Request from ${tpa.sender}`)
     acceptOrDenyUI.button("Accept")
@@ -117,6 +130,8 @@ function acceptOrDenyTpaRequest(player, tpa) {
             // Accept the tpa request
             if (sender) {
                 sender.sendMessage(`§7[§6!§7] §eTeleported to ${tpa.reciever}!`);
+                Noah?.sendMessage?.(`§7[§u!§7] §o${tpa.sender} accepted ${tpa.reciever}'s teleport request.`);
+                player.sendMessage(`§7[§6!§7] §eTeleported to ${tpa.reciever}!`);
                 sender.teleport(player.location);
                 shouldRemove = true;
             } else {
@@ -126,6 +141,8 @@ function acceptOrDenyTpaRequest(player, tpa) {
             // Deny the tpa request
             if (sender) {
                 sender.sendMessage(`§7[§6!§7] §c${tpa.reciever} denied your teleport request.`);
+                Noah?.sendMessage?.(`§7[§u!§7] §o${tpa.sender} denied ${tpa.reciever}'s teleport request.`);
+                player.sendMessage(`§7[§6!§7] §cDenied ${tpa.sender}'s teleport request.`);
             }
             shouldRemove = true;
         }
@@ -137,7 +154,13 @@ function acceptOrDenyTpaRequest(player, tpa) {
     })
 }
 
-function viewSentTpas(player) {
+// ################################################
+// # ╗  ╔ ═╦═ ╔══╗ ╓ ╓ ╓     ╔═══ ╔══╗ ╔╗ ╖ ══╦══ #
+// # ╚╗╔╝  ║  ╠══╝ ║ ║ ║     ╚══╗ ╠══╝ ║╚╗║   ║   #
+// #  ╚╝  ═╩═ ╚═══ ╚═╩═╝     ═══╝ ╚═══ ╙ ╚╝   ╙   #
+// ################################################
+
+function viewSentTpas(player, Noah) {
     const validTpas = validateTPARequests("OutgoingTPARequests")
     const sentTPAs = validTpas.filter(tp => tp.sender == player.name)
 
@@ -153,11 +176,11 @@ function viewSentTpas(player) {
     }
     sentTPAUI.show(player).then((response) => {
         if (response.canceled) return;
-        cancelSentTpaRequest(player, sentTPAs[response.selection])
+        cancelSentTpaRequest(player, sentTPAs[response.selection], Noah)
     })
 }
 
-function cancelSentTpaRequest(player, tpa) {
+function cancelSentTpaRequest(player, tpa, Noah) {
     const cancelUI = new ActionFormData()
     cancelUI.title(`TPA Request to ${tpa.reciever}`)
     cancelUI.button("Cancel request")
@@ -177,6 +200,7 @@ function cancelSentTpaRequest(player, tpa) {
             if (receiver) {
                 receiver.sendMessage(`§7[§6!§7] §c${tpa.sender}'s teleport request was cancelled.`);
             }
+            Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} cancelled their teleport request to ${tpa.reciever}.`);
             player.sendMessage(`§7[§6!§7] §cCancelled your teleport request to ${tpa.reciever}.`);
         }
         // selection == 1 (Back) just closes without changes
@@ -200,6 +224,7 @@ function validateTPARequests(propertyID) {
             if (sender) {
                 sender.sendMessage(`§7[§6!§7] §cYour teleport request to ${request.reciever} has expired.`);
             }
+            Noah?.sendMessage?.(`§7[§u!§7] §o${request.sender}'s teleport request to ${request.reciever} has expired.`);
             return false;
         }
 
