@@ -13,34 +13,8 @@ import { rightClickEvent } from "./phones/prison_pda.js";
 import { tpaScreen } from "./general_functions/tpa.js";
 import { startPaydayInterval } from "./general_functions/payday.js"
 
-function ensureObjective(objectiveId) {
-  if (!world.scoreboard.getObjective(objectiveId)) {
-    try {
-      world.scoreboard.addObjective(objectiveId, objectiveId);
-    } catch (error) {
-      // If another script already created it, keep going.
-    }
-  }
-}
-
-function getObjectiveScore(objectiveId, player) {
-  const objective = world.scoreboard.getObjective(objectiveId);
-  if (!objective) {
-    return undefined;
-  }
-
-  try {
-    return objective.getScore(player);
-  } catch (error) {
-    return undefined;
-  }
-}
-
 world.afterEvents.worldLoad.subscribe((event) => {
     console.warn("World has successfully loaded!");
-    ensureObjective("homeX");
-    ensureObjective("homeY");
-    ensureObjective("homeZ");
 
     // Check if world already has PayDayDefault and IntervalDefault set, if not set them to the default values inside config.js
     if (world.getDynamicProperty(WorldDyanmicPropertiesKey.PAYDAY_AMOUNT) === undefined) {

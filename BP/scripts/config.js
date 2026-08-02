@@ -1,4 +1,4 @@
-export const VERSION = "26.4.3";
+export const VERSION = "26.4.5";
 
 export const TPA_REQUEST_TIMEOUT = 120000; // 2 minutes in milliseconds
 
@@ -17,6 +17,7 @@ export const PlayerDynamicPropertiesKey = { // Not extensive please add more as 
   RIGHT_CLICK_ADD_ITEM_TO_WHITELIST: "rightClickAddItemToWhitelist",
   RIGHT_CLICK_SET_LORE: "rightClickSetLore",
   LORE_TO_SET: "loreToSet",
+  HOME: "homeCoordinates"
 };
 
 export const ItemDynamicPropertiesKey = { // Not extensive please add more as needed

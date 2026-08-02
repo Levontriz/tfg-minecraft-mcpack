@@ -1,6 +1,7 @@
 import { world } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { clearAllRightClick } from "./clearAllRightClick.js";
+import { PlayerDynamicPropertiesKey } from "../config.js";
 
 export function settingsMenu(player, Noah, level) {
   const commandOrder = [];
@@ -87,14 +88,12 @@ export function clearInventoryConfig(player, Noah) {
 }
 
 export function setHome(player, Noah) {
-  const homeX = world.scoreboard.getObjective("homeX");
-  const homeY = world.scoreboard.getObjective("homeY");
-  const homeZ = world.scoreboard.getObjective("homeZ");
+  const homeX = Math.floor(player.location.x);
+  const homeY = Math.round(player.location.y);
+  const homeZ = Math.floor(player.location.z);
 
-  homeX.setScore(player, Math.floor(player.location.x));
-  homeY.setScore(player, Math.round(player.location.y));
-  homeZ.setScore(player, Math.floor(player.location.z));
+  const homeCoordinates = player.setDynamicProperty(PlayerDynamicPropertiesKey.HOME, JSON.stringify([homeX, homeY, homeZ]));
 
   player.sendMessage("§7[§6!§7] §aHome location set!");
-  Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} set their home to ${homeX.getScore(player)}, ${homeY.getScore(player)}, ${homeZ.getScore(player)}.`);
+  Noah?.sendMessage?.(`§7[§u!§7] §o${player.name} set their home to ${homeX}, ${homeY}, ${homeZ}.`);
 }
