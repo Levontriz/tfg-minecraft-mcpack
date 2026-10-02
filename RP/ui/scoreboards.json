@@ -58,7 +58,7 @@
             {
               "displayed_objective": {
                 "type": "image",
-                "texture": "textures/tfg-icons-/tfg-minecraft-title",
+                "texture": "textures/tfg-icons-/title-/title-gold.png",
                 "size": ["35px", "17px"],
                 "anchor_from": "top_middle",
                 "anchor_to": "bottom_middle",
