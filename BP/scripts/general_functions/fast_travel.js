@@ -3,13 +3,13 @@ import { ActionFormData } from "@minecraft/server-ui";
 
 export function fastTravelUi(player, Noah, level) {
   const locations = {
-    "Spawn": { level: 0, x: 0, y: 4, z: 0, texture: "textures/tfg-icons-/t-/ft-/t-ft-1spawn" },
-    "Launchpad": { level: 1, x: -212, y: 5, z: -327, texture: "textures/tfg-icons-/t-/ft-/t-ft-2launchpad" },
-    "Parliament": { level: 1, x: -62, y: 4, z: 242, texture: "textures/tfg-icons-/t-/ft-/t-ft-3parliament" },
-    "The Bean": { level: 1, x: 400, y: 4, z: -91, texture: "textures/tfg-icons-/t-/ft-/t-ft-4bean" },
+    "Spawn": { level: 0, x: 0, y: 87, z: 0, texture: "textures/tfg-icons-/t-/ft-/t-ft-1spawn" },
+    "Launchpad": { level: 1, x: -212, y: 5.1, z: -327, texture: "textures/tfg-icons-/t-/ft-/t-ft-2launchpad" },
+    "Downtown": { level: 1, x: -253, y: 4, z: 322, texture: "textures/tfg-icons-/t-/ft-/t-ft-3downtown" },
+    "Iron Arena": { level: 1, x: 601, y: 4, z: -222, texture: "textures/tfg-icons-/t-/ft-/t-ft-4arena" },
     "Tennis Court": { level: 2, x: 515, y: 4, z: 496, texture: "textures/tfg-icons-/t-/ft-/t-ft-5tennis" },
     "Mars": { level: 2, x: -37, y: 20, z: -570, texture: "textures/tfg-icons-/t-/ft-/t-ft-6mars" },
-    "Coal Pile": { level: 3, x: 492, y: 7, z: -608, texture: "textures/tfg-icons-/t-/ft-/t-ft-7coal" }
+    "Race Track": { level: 3, x: 383, y: 9, z: -798, texture: "textures/tfg-icons-/t-/ft-/t-ft-7track" }
   };
 
   const order = [];
