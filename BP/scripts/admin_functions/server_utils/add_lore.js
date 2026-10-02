@@ -1,5 +1,5 @@
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-
+import { clearAllRightClick } from "../../general_functions/clearAllRightClick.js";
 function addLore(player) {
   const loreLineCount = [];
 

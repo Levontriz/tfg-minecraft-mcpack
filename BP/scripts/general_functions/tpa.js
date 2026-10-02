@@ -53,7 +53,7 @@ function openSendTpaForm(player, Noah) {
 
         // validateTPARequests handles expiry cleanup, notifications and persistence,
         // and hands back the current list of still-valid requests
-        const validTpas = validateTPARequests("OutgoingTPARequests")
+        const validTpas = validateTPARequests("OutgoingTPARequests", Noah)
 
         const alreadyRequested = validTpas.some(request =>
             request.sender == player.name && request.reciever == targetPlayerName
@@ -91,7 +91,7 @@ function openSendTpaForm(player, Noah) {
 // ##################################################################
 
 function viewReceivedTpas(player, Noah) {
-    const validTpas = validateTPARequests("OutgoingTPARequests")
+    const validTpas = validateTPARequests("OutgoingTPARequests", Noah)
     const receivedTPAs = validTpas.filter(tp => tp.reciever == player.name)
 
     if (receivedTPAs.length === 0) {
@@ -120,7 +120,7 @@ function acceptOrDenyTpaRequest(player, tpa, Noah) {
         if (response.canceled) return;
 
         // Re-fetch and re-validate the current list rather than relying on stale data
-        const validTpas = validateTPARequests("OutgoingTPARequests")
+        const validTpas = validateTPARequests("OutgoingTPARequests", Noah)
         const currentPlayers = world.getAllPlayers();
         const sender = currentPlayers.find(p => p.name == tpa.sender);
 
@@ -161,7 +161,7 @@ function acceptOrDenyTpaRequest(player, tpa, Noah) {
 // ################################################
 
 function viewSentTpas(player, Noah) {
-    const validTpas = validateTPARequests("OutgoingTPARequests")
+    const validTpas = validateTPARequests("OutgoingTPARequests", Noah)
     const sentTPAs = validTpas.filter(tp => tp.sender == player.name)
 
     if (sentTPAs.length === 0) {
@@ -190,7 +190,7 @@ function cancelSentTpaRequest(player, tpa, Noah) {
 
         if (response.selection == 0) {
             // Re-fetch and re-validate so we're not working off a stale list
-            const validTpas = validateTPARequests("OutgoingTPARequests")
+            const validTpas = validateTPARequests("OutgoingTPARequests", Noah)
             const remainingTpas = validTpas.filter(tp => !(tp.sender == tpa.sender && tp.reciever == tpa.reciever && tp.sendTime == tpa.sendTime))
 
             world.setDynamicProperty("OutgoingTPARequests", JSON.stringify({ tpas: remainingTpas }))
@@ -209,7 +209,7 @@ function cancelSentTpaRequest(player, tpa, Noah) {
 
 // Loads the dynamic property, expires any stale requests (notifying their senders
 // and removing them), persists the cleaned-up list, and returns the still-valid tpas.
-function validateTPARequests(propertyID) {
+function validateTPARequests(propertyID, Noah) {
     const dynamicData = formatDynamicValueOfJSON(propertyID)
     const currentPlayers = world.getAllPlayers();
     const now = Date.now();
