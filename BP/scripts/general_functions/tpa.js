@@ -130,8 +130,8 @@ function acceptOrDenyTpaRequest(player, tpa, Noah) {
             // Accept the tpa request
             if (sender) {
                 sender.sendMessage(`§7[§6!§7] §eTeleported to ${tpa.reciever}!`);
-                Noah?.sendMessage?.(`§7[§u!§7] §o${tpa.sender} accepted ${tpa.reciever}'s teleport request.`);
-                player.sendMessage(`§7[§6!§7] §eTeleported to ${tpa.reciever}!`);
+                Noah?.sendMessage?.(`§7[§u!§7] §o${tpa.reciever} accepted ${tpa.sender}'s teleport request.`);
+                player.sendMessage(`§7[§6!§7] §e${tpa.sender} teleported to you!`);
                 sender.teleport(player.location);
                 shouldRemove = true;
             } else {
@@ -141,7 +141,7 @@ function acceptOrDenyTpaRequest(player, tpa, Noah) {
             // Deny the tpa request
             if (sender) {
                 sender.sendMessage(`§7[§6!§7] §c${tpa.reciever} denied your teleport request.`);
-                Noah?.sendMessage?.(`§7[§u!§7] §o${tpa.sender} denied ${tpa.reciever}'s teleport request.`);
+                Noah?.sendMessage?.(`§7[§u!§7] §o${tpa.reciever} denied ${tpa.sender}'s teleport request.`);
                 player.sendMessage(`§7[§6!§7] §cDenied ${tpa.sender}'s teleport request.`);
             }
             shouldRemove = true;
