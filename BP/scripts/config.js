@@ -1,4 +1,4 @@
-export const VERSION = "26.4.6";
+export const VERSION = "26.4.7";
 
 export const TPA_REQUEST_TIMEOUT = 120000; // 2 minutes in milliseconds
 

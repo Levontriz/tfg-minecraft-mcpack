@@ -399,14 +399,14 @@ function prisonDoorUi(player, notifier) {
                     if (actionSel === 0) {
                         // Open: replace closed blocks with air
                         player.dimension.runCommand(
-                            `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} air 0 replace ${blockType} 0`
+                            `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} air [] replace ${blockType} []`
                         );
                         player.sendMessage(`§7[§6!§7] §a${doorName} door opened.`);
                         notifier?.sendMessage?.(`§7[§u!§7] §o${player.name} opened the ${doorName} door.`);
                     } else if (actionSel === 1) {
                         // Close: replace air with the stored block type
                         player.dimension.runCommand(
-                            `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} ${blockType} 0 replace air 0`
+                            `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} ${blockType} [] replace air []`
                         );
                         player.sendMessage(`§7[§6!§7] §a${doorName} door closed.`);
                         notifier?.sendMessage?.(`§7[§u!§7] §o${player.name} closed the ${doorName} door.`);
@@ -453,7 +453,7 @@ function temporarilyToggleDoor(player, notifier, doorEntry, autoClose = false) {
 
     // Open immediately
     player.dimension.runCommand(
-        `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} air 0 replace ${blockType} 0`
+        `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} air [] replace ${blockType} []`
     );
     player.sendMessage(`§7[§6!§7] §a${doorName} door temporarily opened.`);
     notifier?.sendMessage?.(`§7[§u!§7] §o${player.name} temporarily opened the ${doorName} door.`);
@@ -463,7 +463,7 @@ function temporarilyToggleDoor(player, notifier, doorEntry, autoClose = false) {
         system.runTimeout(() => {
             try {
                 player.dimension.runCommand(
-                    `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} ${blockType} 0 replace air 0`
+                    `fill ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} ${blockType} [] replace air []`
                 );
             } catch (e) {
                 // Dimension/player may no longer be valid; ignore
